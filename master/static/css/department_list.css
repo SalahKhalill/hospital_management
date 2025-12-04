@@ -1,0 +1,203 @@
+/* @author Tim himself */
+
+.ziehharmonika h3 {
+    background: rgba(255, 255, 255, 0);
+    color: #151414;
+    text-align: left;
+    border-radius: 0px;
+    padding: 25px 20px;
+    cursor: pointer;
+    margin-top: 0;
+    margin-bottom: 25px;
+    padding-right: 40px;
+    transition: 0.25s all;
+    position: relative;
+    border: 6px solid #191919;
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+.ziehharmonika h3.active {
+    margin-bottom: 21px;
+background: #207fdc;
+    border: 6px solid rgba(44, 185, 139, 0.01);
+}
+.ziehharmonika h3::before {
+    content: attr(data-prefix);
+    font-size: 18px;
+    margin-right: 9px;
+}
+.ziehharmonika > div {
+    display: none;
+        background: #fff;
+    border-radius: 0;
+    border: 1px solid #cdcdcd;
+    text-align: left;
+    padding: 31px 33px;
+    margin-bottom: 9px;
+}
+.ziehharmonika .arrowDown {
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 13.0px 7.5px 0 7.5px;
+    border-color: #272e35 transparent transparent transparent;
+    position: absolute;
+    bottom: 0;
+    left: 40px;
+    transition: 0.25s all;
+    opacity: 0;
+}
+.ziehharmonika .active .arrowDown {
+    bottom: -18px;
+    border-color: #207fdc transparent transparent transparent;
+    opacity: 1;
+}
+.ziehharmonika .collapseIcon {
+        position: absolute;
+    right: 20px;
+    top: 52%;
+    font-size: 30px;
+    font-weight: 400;
+    -ms-transform: translate(0, -50%);
+    transform: translate(0, -50%);
+}
+/*--/Responsive--*/
+@media(max-width:640px){
+    .ziehharmonika > div {
+        display: none;
+        background: #fff;
+        border-radius: 0;
+        border: 1px solid #cdcdcd;
+        text-align: left;
+        padding: 15px 15px;
+        margin-bottom: 9px;
+    }
+    .ziehharmonika h3 {
+    padding: 15px 20px;
+    }
+}
+@media(max-width:414px){
+    .ziehharmonika h3 {
+        padding: 9px 15px;
+        margin-bottom: 14px;
+        padding-right: 40px;
+        font-size: 1.2em;
+    }
+}
+/*--//Responsive--*/
+
+
+
+
+    #about {
+padding:5em 0
+}
+h3.w3_heade_tittle_agile,h2.w3_heade_tittle_agile  {
+    text-align: center;
+    font-weight: 700;
+    color: #111;
+    font-size: 3em;
+        letter-spacing: 1px;
+
+}
+h3.w3_heade_tittle_agile.two {
+    color: #fff;
+}
+
+p.sub_t_agileits {
+    font-size: 1em;
+    margin: 0;
+    color: #de0f17;
+    margin-bottom: 3em;
+    font-weight: 400;
+    letter-spacing: 10px;
+    text-align: center;
+}
+
+.tab-image img {
+    width: 100%;
+}
+
+/* Rectangle In */
+.hvr-rectangle-in {
+display: inline-block;
+vertical-align: middle;
+-webkit-transform: perspective(1px) translateZ(0);
+transform: perspective(1px) translateZ(0);
+box-shadow: 0 0 1px transparent;
+position: relative;
+background:#207fdc;
+-webkit-transition-property: color;
+transition-property: color;
+-webkit-transition-duration: 0.3s;
+transition-duration: 0.3s;
+}
+.hvr-rectangle-in:before {
+content: "";
+position: absolute;
+z-index: -1;
+top: 0;
+left: 0;
+right: 0;
+bottom: 0;
+background: #de0f17;
+-webkit-transform: scale(1);
+transform: scale(1);
+-webkit-transition-property: transform;
+transition-property: transform;
+-webkit-transition-duration: 0.3s;
+transition-duration: 0.3s;
+-webkit-transition-timing-function: ease-out;
+transition-timing-function: ease-out;
+}
+
+.read a {
+    padding: 0.7em 2em;
+    color: #fff;
+    letter-spacing: 1px;
+}
+
+    .card {
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+    max-width: 300px;
+    margin: auto;
+    text-align: center;
+    font-family: arial;
+    }
+
+    .title {
+    color: grey;
+    font-size: 21px;
+    }
+
+    .button {
+    border: none;
+    outline: 0;
+    display: inline-block;
+    padding: 8px;
+    color: white;
+    background-color: #000;
+    text-align: center;
+    cursor: pointer;
+    width: 100%;
+    font-size: 21px;
+    }
+
+    button:hover,
+    a:hover {
+    opacity: 0.7;
+    }
+
+    .grid-container {
+    display: grid;
+    grid-template-columns: auto auto auto auto;
+    padding: 10px;
+    }
+
+    a:link {
+    text-decoration: none;
+    }
+
+    a {
+    color: white;
+    }

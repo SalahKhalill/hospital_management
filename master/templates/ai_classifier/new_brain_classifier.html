@@ -1,0 +1,359 @@
+{% extends 'new_base.html' %}
+{% load static %}
+
+{% block title %}
+<title>Brain Tumor Detection - AI Classifier</title>
+{% endblock %}
+
+{% block content %}
+<!-- Hero Header -->
+<section class="bg-gradient-custom text-white py-5">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-8" data-aos="fade-right">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb mb-3">
+                        <li class="breadcrumb-item"><a href="{% url 'home' %}" class="text-white-50 text-decoration-none">Home</a></li>
+                        <li class="breadcrumb-item"><a href="#" class="text-white-50 text-decoration-none">AI Services</a></li>
+                        <li class="breadcrumb-item active text-white" aria-current="page">Brain Tumor Detection</li>
+                    </ol>
+                </nav>
+                <h1 class="display-5 fw-bold mb-3">
+                    <i class="fas fa-brain me-3"></i>Brain Tumor Detection
+                </h1>
+                <p class="lead mb-0 opacity-90">
+                    Advanced AI-powered MRI scan analysis for accurate brain tumor classification using deep learning technology.
+                </p>
+            </div>
+            <div class="col-lg-4 text-end d-none d-lg-block" data-aos="fade-left">
+                <div class="position-relative">
+                    <div class="floating-icon" style="font-size: 8rem; opacity: 0.2;">
+                        <i class="fas fa-brain"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <!-- Upload Section -->
+                <div class="card card-modern border-0 shadow-lg mb-4" data-aos="fade-up">
+                    <div class="card-header bg-transparent border-0 pt-4 pb-0 px-4">
+                        <div class="d-flex align-items-center">
+                            <div class="rounded-circle bg-primary bg-opacity-10 p-3 me-3">
+                                <i class="fas fa-cloud-upload-alt fa-lg text-primary"></i>
+                            </div>
+                            <div>
+                                <h4 class="fw-bold mb-1">Upload MRI Scan</h4>
+                                <p class="text-muted mb-0 small">Upload a clear MRI brain scan image for analysis</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body p-4 p-md-5">
+                        <form method="POST" enctype="multipart/form-data" id="uploadForm">
+                            {% csrf_token %}
+                            
+                            <div class="upload-area mb-4" id="uploadArea">
+                                <input type="file" class="form-control" id="image" name="image" accept="image/*" required style="display: none;">
+                                <div class="text-center p-5" id="uploadPlaceholder">
+                                    <div class="upload-icon-wrapper mb-4">
+                                        <i class="fas fa-cloud-upload-alt"></i>
+                                    </div>
+                                    <h5 class="fw-bold mb-2">Drag & Drop MRI Image Here</h5>
+                                    <p class="text-muted mb-4">or click to browse files</p>
+                                    <button type="button" class="btn btn-primary-custom rounded-pill px-4" onclick="document.getElementById('image').click()">
+                                        <i class="fas fa-folder-open me-2"></i>Browse Files
+                                    </button>
+                                    <div class="mt-4">
+                                        <span class="badge bg-light text-muted me-2"><i class="fas fa-image me-1"></i>JPG</span>
+                                        <span class="badge bg-light text-muted me-2"><i class="fas fa-image me-1"></i>PNG</span>
+                                        <span class="badge bg-light text-muted"><i class="fas fa-image me-1"></i>JPEG</span>
+                                    </div>
+                                </div>
+                                <div id="imagePreview" class="text-center" style="display: none;">
+                                    <img id="previewImg" src="" alt="Preview" class="img-fluid rounded-3 shadow-sm">
+                                    <button type="button" class="btn btn-outline-danger rounded-pill mt-3" onclick="clearImage()">
+                                        <i class="fas fa-times me-2"></i>Remove Image
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary-custom btn-lg rounded-pill" id="analyzeBtn" disabled>
+                                    <i class="fas fa-microscope me-2"></i>Analyze MRI Scan
+                                    <i class="fas fa-arrow-right ms-2"></i>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Results Section -->
+                {% if result %}
+                <div class="card card-modern border-0 shadow-lg mb-4" data-aos="fade-up">
+                    <div class="card-header bg-transparent border-0 pt-4 pb-0 px-4">
+                        <div class="d-flex align-items-center">
+                            <div class="rounded-circle bg-success bg-opacity-10 p-3 me-3">
+                                <i class="fas fa-chart-line fa-lg text-success"></i>
+                            </div>
+                            <div>
+                                <h4 class="fw-bold mb-1">Analysis Results</h4>
+                                <p class="text-muted mb-0 small">AI-powered diagnostic assessment</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body p-4 p-md-5">
+                        <div class="row g-4">
+                            <!-- Image Display -->
+                            <div class="col-lg-5">
+                                <div class="position-relative">
+                                    <div class="badge bg-primary position-absolute top-0 start-0 m-3 z-1">
+                                        <i class="fas fa-check me-1"></i>Analyzed
+                                    </div>
+                                    <img src="data:image/png;base64,{{ img }}" alt="Analyzed MRI" class="img-fluid rounded-3 shadow">
+                                </div>
+                            </div>
+
+                            <!-- Results Display -->
+                            <div class="col-lg-7">
+                                <div class="result-card p-4 rounded-3 mb-4 {% if result == 'No Tumor' %}bg-success{% else %}bg-warning{% endif %} bg-opacity-10">
+                                    <div class="d-flex align-items-center mb-3">
+                                        <div class="rounded-circle {% if result == 'No Tumor' %}bg-success{% else %}bg-warning{% endif %} bg-opacity-25 p-3 me-3">
+                                            <i class="fas {% if result == 'No Tumor' %}fa-check-circle text-success{% else %}fa-exclamation-triangle text-warning{% endif %} fa-2x"></i>
+                                        </div>
+                                        <div>
+                                            <p class="text-muted small mb-1">Detected Condition</p>
+                                            <h3 class="fw-bold mb-0 {% if result == 'No Tumor' %}text-success{% else %}text-warning{% endif %}">{{ result }}</h3>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="card border-0 bg-light mb-4">
+                                    <div class="card-body">
+                                        <h6 class="fw-bold mb-3">
+                                            <i class="fas fa-lightbulb text-warning me-2"></i>About This Diagnosis
+                                        </h6>
+                                        <p class="mb-0 text-muted">
+                                            {% if result == "Glioma" %}
+                                            A glioma is a type of tumor that starts in the glial cells of the brain or spine. Gliomas comprise about 30% of all brain tumors and central nervous system tumors.
+                                            {% elif result == "Meningioma" %}
+                                            Meningioma is a tumor that forms on membranes covering the brain and spinal cord. Most meningiomas are noncancerous (benign) and grow slowly.
+                                            {% elif result == "Pituitary" %}
+                                            Pituitary tumors are abnormal growths that develop in the pituitary gland. Most pituitary tumors are noncancerous and treatable.
+                                            {% elif result == "No Tumor" %}
+                                            No tumor was detected in the provided MRI scan. The scan appears normal, but regular check-ups are still recommended.
+                                            {% else %}
+                                            A brain abnormality has been detected. Please consult with a specialist for detailed diagnosis and treatment options.
+                                            {% endif %}
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div class="alert alert-warning d-flex align-items-start border-0 rounded-3 mb-4">
+                                    <i class="fas fa-exclamation-triangle me-3 mt-1 text-warning"></i>
+                                    <div>
+                                        <h6 class="fw-bold mb-1">Important Medical Disclaimer</h6>
+                                        <p class="mb-0 small">
+                                            This AI analysis is for preliminary screening only. Please consult a qualified neurologist 
+                                            or radiologist for professional medical diagnosis and treatment recommendations.
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div class="d-flex flex-wrap gap-2">
+                                    <a href="{% url 'brain_classifier' %}" class="btn btn-outline-primary rounded-pill">
+                                        <i class="fas fa-redo me-2"></i>Analyze Another
+                                    </a>
+                                    <a href="{% url 'book_appointment' %}" class="btn btn-success-custom rounded-pill">
+                                        <i class="fas fa-user-md me-2"></i>Consult a Doctor
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- How It Works Section -->
+                <div class="card card-modern border-0 shadow-lg" data-aos="fade-up">
+                    <div class="card-body p-4 p-md-5">
+                        <div class="text-center mb-5">
+                            <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-3 py-2 mb-3">
+                                <i class="fas fa-cogs me-1"></i>Process
+                            </span>
+                            <h4 class="fw-bold">How It Works</h4>
+                            <p class="text-muted">Simple 3-step process for accurate diagnosis</p>
+                        </div>
+                        <div class="row g-4">
+                            <div class="col-md-4">
+                                <div class="text-center p-4 rounded-3 bg-light h-100">
+                                    <div class="step-number mb-3">1</div>
+                                    <div class="rounded-circle bg-primary bg-opacity-10 d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+                                        <i class="fas fa-upload fa-2x text-primary"></i>
+                                    </div>
+                                    <h6 class="fw-bold">Upload Image</h6>
+                                    <p class="text-muted small mb-0">Upload your MRI brain scan image in JPG, PNG, or JPEG format</p>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="text-center p-4 rounded-3 bg-light h-100">
+                                    <div class="step-number mb-3">2</div>
+                                    <div class="rounded-circle bg-info bg-opacity-10 d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+                                        <i class="fas fa-brain fa-2x text-info"></i>
+                                    </div>
+                                    <h6 class="fw-bold">AI Analysis</h6>
+                                    <p class="text-muted small mb-0">Our deep learning model analyzes the scan patterns</p>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="text-center p-4 rounded-3 bg-light h-100">
+                                    <div class="step-number mb-3">3</div>
+                                    <div class="rounded-circle bg-success bg-opacity-10 d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+                                        <i class="fas fa-file-medical fa-2x text-success"></i>
+                                    </div>
+                                    <h6 class="fw-bold">Get Results</h6>
+                                    <p class="text-muted small mb-0">Receive instant classification results with diagnosis info</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- AI Model Info -->
+         
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+document.getElementById('image').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            document.getElementById('previewImg').src = e.target.result;
+            document.getElementById('uploadPlaceholder').style.display = 'none';
+            document.getElementById('imagePreview').style.display = 'block';
+            document.getElementById('analyzeBtn').disabled = false;
+        }
+        reader.readAsDataURL(file);
+    }
+});
+
+function clearImage() {
+    document.getElementById('image').value = '';
+    document.getElementById('uploadPlaceholder').style.display = 'block';
+    document.getElementById('imagePreview').style.display = 'none';
+    document.getElementById('analyzeBtn').disabled = true;
+}
+
+// Drag and drop functionality
+const uploadArea = document.getElementById('uploadArea');
+
+['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+    uploadArea.addEventListener(eventName, preventDefaults, false);
+});
+
+function preventDefaults(e) {
+    e.preventDefault();
+    e.stopPropagation();
+}
+
+['dragenter', 'dragover'].forEach(eventName => {
+    uploadArea.addEventListener(eventName, highlight, false);
+});
+
+['dragleave', 'drop'].forEach(eventName => {
+    uploadArea.addEventListener(eventName, unhighlight, false);
+});
+
+function highlight(e) {
+    uploadArea.classList.add('dragging');
+}
+
+function unhighlight(e) {
+    uploadArea.classList.remove('dragging');
+}
+
+uploadArea.addEventListener('drop', handleDrop, false);
+
+function handleDrop(e) {
+    const dt = e.dataTransfer;
+    const files = dt.files;
+    document.getElementById('image').files = files;
+    
+    const event = new Event('change', { bubbles: true });
+    document.getElementById('image').dispatchEvent(event);
+}
+</script>
+
+<style>
+.upload-area {
+    border: 2px dashed #dee2e6;
+    border-radius: 16px;
+    transition: all 0.3s ease;
+    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+    cursor: pointer;
+}
+
+.upload-area:hover, .upload-area.dragging {
+    border-color: var(--primary-color);
+    background: linear-gradient(135deg, rgba(37, 99, 235, 0.05) 0%, #ffffff 100%);
+    transform: scale(1.01);
+}
+
+.upload-icon-wrapper {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary-color) 0%, #60a5fa 100%);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 2.5rem;
+    animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+#imagePreview img {
+    max-height: 350px;
+    object-fit: contain;
+}
+
+.step-number {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--gradient-primary);
+    color: white;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 0.875rem;
+}
+
+.floating-icon {
+    animation: float 6s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-20px); }
+}
+
+.breadcrumb-item + .breadcrumb-item::before {
+    color: rgba(255, 255, 255, 0.5);
+}
+</style>
+{% endblock %}

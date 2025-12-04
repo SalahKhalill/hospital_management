@@ -1,0 +1,372 @@
+{% extends "new_base.html" %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block title %}My Profile{% endblock %}
+
+{% block extra_css %}
+<style>
+    .profile-section {
+        padding: 40px 0 80px;
+        min-height: calc(100vh - 76px);
+    }
+    
+    .profile-header {
+        background: var(--gradient-primary);
+        border-radius: 20px;
+        padding: 40px;
+        margin-bottom: 30px;
+        color: white;
+        box-shadow: 0 10px 40px rgba(99, 102, 241, 0.3);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .profile-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 100%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+    }
+    
+    .profile-header h2 {
+        font-weight: 700;
+        margin: 0;
+        position: relative;
+    }
+    
+    .profile-header p {
+        margin: 10px 0 0;
+        opacity: 0.9;
+        position: relative;
+    }
+    
+    .profile-avatar {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        border: 5px solid rgba(255,255,255,0.3);
+        object-fit: cover;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    }
+    
+    .profile-avatar-placeholder {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 5px solid rgba(255,255,255,0.3);
+    }
+    
+    .profile-avatar-placeholder i {
+        font-size: 50px;
+        color: white;
+    }
+    
+    .role-badge {
+        background: rgba(255,255,255,0.2);
+        color: white;
+        padding: 8px 20px;
+        border-radius: 25px;
+        font-size: 0.9rem;
+        font-weight: 500;
+        display: inline-block;
+        margin-top: 15px;
+    }
+    
+    .profile-card {
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        overflow: hidden;
+        margin-bottom: 30px;
+    }
+    
+    .card-header-custom {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        padding: 20px 25px;
+        border-bottom: 1px solid #e9ecef;
+    }
+    
+    .card-header-custom h5 {
+        margin: 0;
+        font-weight: 600;
+        color: #333;
+    }
+    
+    .card-body-custom {
+        padding: 30px;
+    }
+    
+    .card-body-custom .form-control,
+    .card-body-custom .form-select {
+        border-radius: 10px;
+        padding: 12px 15px;
+        border: 2px solid #e9ecef;
+        transition: all 0.3s ease;
+    }
+    
+    .card-body-custom .form-control:focus,
+    .card-body-custom .form-select:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    
+    .card-body-custom label {
+        font-weight: 500;
+        color: #333;
+        margin-bottom: 8px;
+    }
+    
+    .btn-save-profile {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        border-radius: 10px;
+        padding: 14px 40px;
+        font-weight: 600;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-save-profile:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+    }
+    
+    .section-title {
+        color: #667eea;
+        font-weight: 600;
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #e9ecef;
+    }
+    
+    .quick-links {
+        background: white;
+        border-radius: 15px;
+        padding: 25px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+    }
+    
+    .quick-links h6 {
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 15px;
+    }
+    
+    .quick-link-item {
+        display: flex;
+        align-items: center;
+        padding: 12px 15px;
+        border-radius: 10px;
+        color: #666;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        margin-bottom: 10px;
+    }
+    
+    .quick-link-item:hover {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        transform: translateX(5px);
+    }
+    
+    .quick-link-item i {
+        width: 35px;
+        height: 35px;
+        border-radius: 10px;
+        background: rgba(102, 126, 234, 0.1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 12px;
+        transition: all 0.3s ease;
+    }
+    
+    .quick-link-item:hover i {
+        background: rgba(255,255,255,0.2);
+    }
+    
+    .profile-stats {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 15px;
+        padding: 25px;
+        color: white;
+        margin-bottom: 20px;
+    }
+    
+    .profile-stats h6 {
+        font-weight: 600;
+        margin-bottom: 20px;
+    }
+    
+    .stat-item {
+        text-align: center;
+        padding: 15px;
+    }
+    
+    .stat-item .number {
+        font-size: 2rem;
+        font-weight: 700;
+    }
+    
+    .stat-item .label {
+        opacity: 0.9;
+        font-size: 0.85rem;
+    }
+    
+    .tips-card {
+        background: #e8f5e9;
+        border-radius: 15px;
+        padding: 20px;
+        border-left: 4px solid #4caf50;
+    }
+    
+    .tips-card h6 {
+        color: #2e7d32;
+        font-weight: 600;
+        margin-bottom: 10px;
+    }
+    
+    .tips-card ul {
+        color: #388e3c;
+        margin: 0;
+        padding-left: 20px;
+        font-size: 0.9rem;
+    }
+    
+    .tips-card li {
+        margin-bottom: 5px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="profile-section">
+    <div class="container">
+        <!-- Profile Header -->
+        <div class="profile-header" data-aos="fade-down">
+            <div class="row align-items-center">
+                <div class="col-auto">
+                    {% if request.user.doctor %}
+                    <img class="profile-avatar" src="{{ request.user.doctor.profile_pic.url }}" alt="Profile">
+                    {% elif request.user.nurse %}
+                    <img class="profile-avatar" src="{{ request.user.nurse.profile_pic.url }}" alt="Profile">
+                    {% elif request.user.patient %}
+                    <img class="profile-avatar" src="{{ request.user.patient.profile_pic.url }}" alt="Profile">
+                    {% else %}
+                    <div class="profile-avatar-placeholder">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="col">
+                    <h2>{{ request.user.get_full_name|default:request.user.username }}</h2>
+                    <p><i class="fas fa-envelope me-2"></i>{{ request.user.email }}</p>
+                    <span class="role-badge">
+                        <i class="fas fa-id-badge me-2"></i>{{ request.user.role|title }}
+                    </span>
+                </div>
+                <div class="col-auto d-none d-lg-block">
+                    <i class="fas fa-user-circle" style="font-size: 100px; opacity: 0.2;"></i>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-lg-8" data-aos="fade-up">
+                <form action="" method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    
+                    <!-- User Information Card -->
+                    <div class="profile-card">
+                        <div class="card-header-custom">
+                            <h5><i class="fas fa-user me-2 text-primary"></i>Account Information</h5>
+                        </div>
+                        <div class="card-body-custom">
+                            {{ user_form|crispy }}
+                        </div>
+                    </div>
+                    
+                    <!-- Profile Information Card -->
+                    {% if profile_form %}
+                    <div class="profile-card">
+                        <div class="card-header-custom">
+                            <h5><i class="fas fa-id-card me-2 text-success"></i>Profile Details</h5>
+                        </div>
+                        <div class="card-body-custom">
+                            {{ profile_form|crispy }}
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Location Information Card -->
+                    {% if location_form %}
+                    <div class="profile-card">
+                        <div class="card-header-custom">
+                            <h5><i class="fas fa-map-marker-alt me-2 text-danger"></i>Location Information</h5>
+                        </div>
+                        <div class="card-body-custom">
+                            {{ location_form|crispy }}
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Save Button -->
+                    <div class="text-center mt-4">
+                        <button class="btn btn-primary btn-save-profile" type="submit">
+                            <i class="fas fa-save me-2"></i>Save Changes
+                        </button>
+                    </div>
+                </form>
+            </div>
+            
+            <div class="col-lg-4" data-aos="fade-up" data-aos-delay="100">
+                <!-- Quick Links -->
+                <div class="quick-links mb-4">
+                    <h6><i class="fas fa-bolt me-2 text-warning"></i>Quick Actions</h6>
+                    
+                    <a href="{% url 'change_password' %}" class="quick-link-item">
+                        <i class="fas fa-key text-primary"></i>
+                        <span>Change Password</span>
+                    </a>
+                    
+                    {% if request.user.role == 'patient' %}
+                    <a href="{% url 'patient_dashboard' %}" class="quick-link-item">
+                        <i class="fas fa-tachometer-alt text-success"></i>
+                        <span>Go to Dashboard</span>
+                    </a>
+                    {% elif request.user.role == 'doctor' %}
+                    <a href="{% url 'doctor_dashboard' %}" class="quick-link-item">
+                        <i class="fas fa-tachometer-alt text-success"></i>
+                        <span>Go to Dashboard</span>
+                    </a>
+                    {% elif request.user.role == 'nurse' %}
+                    <a href="{% url 'nurse_dashboard' %}" class="quick-link-item">
+                        <i class="fas fa-tachometer-alt text-success"></i>
+                        <span>Go to Dashboard</span>
+                    </a>
+                    {% elif request.user.role == 'admin' %}
+                    <a href="{% url 'admin_dashboard' %}" class="quick-link-item">
+                        <i class="fas fa-tachometer-alt text-success"></i>
+                        <span>Go to Dashboard</span>
+                    </a>
+                    {% endif %}
+                </div>
+                
+                <!-- Tips Card -->
+               
+                
+                <!-- Account Status -->
+            
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

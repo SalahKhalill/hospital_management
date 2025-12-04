@@ -1,0 +1,178 @@
+{% extends "new_base.html" %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block title %}Book Appointment{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-5" style="min-height: 100vh;">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8 col-xl-6">
+                <!-- Page Header -->
+                <div class="text-center mb-4">
+                    <h1 class="display-5 fw-bold text-primary mb-2">
+                        <i class="fas fa-calendar-plus me-2"></i>Book an Appointment
+                    </h1>
+                    <p class="text-muted fs-5">Schedule your visit with our healthcare professionals</p>
+                </div>
+
+                <!-- Main Card -->
+                <div class="card border-0 shadow-lg">
+                    <div class="card-header bg-gradient text-white text-center py-4" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                        <div class="mb-3">
+                            {% if request.user.doctor %}
+                            <img src="{{ request.user.doctor.profile_pic.url }}" 
+                                 alt="Profile" 
+                                 class="rounded-circle border border-3 border-white shadow"
+                                 width="100" height="100"
+                                 style="object-fit: cover;">
+                            {% elif request.user.nurse %}
+                            <img src="{{ request.user.nurse.profile_pic.url }}" 
+                                 alt="Profile" 
+                                 class="rounded-circle border border-3 border-white shadow"
+                                 width="100" height="100"
+                                 style="object-fit: cover;">
+                            {% elif request.user.patient %}
+                            <img src="{{ request.user.patient.profile_pic.url }}" 
+                                 alt="Profile" 
+                                 class="rounded-circle border border-3 border-white shadow"
+                                 width="100" height="100"
+                                 style="object-fit: cover;">
+                            {% endif %}
+                        </div>
+                        <h4 class="mb-0">{{ request.user.get_full_name|default:request.user.username }}</h4>
+                        <small class="opacity-75">{{ request.user.role }}</small>
+                    </div>
+                    
+                    <div class="card-body p-5">
+                        <form method="post" id="appointmentForm">
+                            {% csrf_token %}
+                            
+                            <div class="mb-4">
+                                <div class="alert alert-info d-flex align-items-center" role="alert">
+                                    <i class="fas fa-info-circle me-2 fa-lg"></i>
+                                    <div>
+                                        <strong>Note:</strong> Your appointment request will be reviewed and confirmed by our staff. You'll receive a notification once confirmed.
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Form Fields -->
+                            <div class="appointment-form">
+                                {{ appointment_form|crispy }}
+                            </div>
+
+                            <!-- Submit Buttons -->
+                            <div class="d-grid gap-2 mt-4">
+                                <button type="submit" class="btn btn-primary btn-lg py-3">
+                                    <i class="fas fa-calendar-check me-2"></i>Book Appointment
+                                </button>
+                                <a href="javascript:history.back()" class="btn btn-outline-secondary">
+                                    <i class="fas fa-arrow-left me-2"></i>Cancel
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Additional Information -->
+                <div class="row mt-4">
+                    <div class="col-md-4 mb-3">
+                        <div class="card border-0 shadow-sm text-center p-3">
+                            <i class="fas fa-clock fa-2x text-primary mb-2"></i>
+                            <h6 class="mb-1">Working Hours</h6>
+                            <small class="text-muted">9:00 AM - 5:00 PM</small>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="card border-0 shadow-sm text-center p-3">
+                            <i class="fas fa-bell fa-2x text-success mb-2"></i>
+                            <h6 class="mb-1">Confirmation</h6>
+                            <small class="text-muted">Within 24 hours</small>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="card border-0 shadow-sm text-center p-3">
+                            <i class="fas fa-phone-alt fa-2x text-warning mb-2"></i>
+                            <h6 class="mb-1">Need Help?</h6>
+                            <small class="text-muted">Contact Support</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Style the form fields */
+    .appointment-form label {
+        font-weight: 600;
+        color: #2d3748;
+        margin-bottom: 0.5rem;
+    }
+    
+    .appointment-form input,
+    .appointment-form select,
+    .appointment-form textarea {
+        border: 2px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 12px;
+        transition: all 0.3s ease;
+    }
+    
+    .appointment-form input:focus,
+    .appointment-form select:focus,
+    .appointment-form textarea:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        outline: none;
+    }
+    
+    .appointment-form .form-control:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        font-weight: 600;
+        transition: transform 0.2s ease;
+    }
+    
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+    }
+    
+    .card {
+        transition: transform 0.3s ease;
+    }
+    
+    .card:hover {
+        transform: translateY(-5px);
+    }
+</style>
+
+<script>
+    // Add Bootstrap classes to Django form fields
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('appointmentForm');
+        const inputs = form.querySelectorAll('input:not([type="hidden"]), select, textarea');
+        
+        inputs.forEach(input => {
+            if (!input.classList.contains('form-control')) {
+                input.classList.add('form-control');
+            }
+        });
+        
+        // Style date inputs
+        const dateInputs = form.querySelectorAll('input[type="date"]');
+        dateInputs.forEach(input => {
+            input.min = new Date().toISOString().split('T')[0]; // Prevent past dates
+        });
+    });
+</script>
+{% endblock %}

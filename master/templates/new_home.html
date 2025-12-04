@@ -1,0 +1,477 @@
+{% extends 'new_base.html' %}
+{% load static %}
+
+{% block title %}
+<title>MedCare - Advanced Healthcare Solutions</title>
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container">
+        <div class="row align-items-center min-vh-50">
+            <div class="col-lg-7" data-aos="fade-right">
+       
+                <h1 class="display-3 fw-bold mb-4" style="line-height: 1.2;">
+                    Your Health, <br>
+                    <span class="text-warning">Our Priority</span>
+                </h1>
+                <p class="lead mb-4 opacity-90" style="font-size: 1.2rem;">
+                    Experience world-class healthcare with advanced AI-powered diagnostics, 
+                    expert doctors, and compassionate care tailored to your needs.
+                </p>
+                <div class="d-flex flex-wrap gap-3 mb-4">
+                    {% if not user.is_authenticated %}
+                    <a href="{% url 'register' 'patient' %}" class="btn btn-light btn-lg px-4 py-3 fw-semibold shadow">
+                        <i class="fas fa-user-plus me-2"></i>Get Started Free
+                    </a>
+                    <a href="{% url 'login' 'patient' %}" class="btn btn-outline-light btn-lg px-4 py-3 fw-semibold">
+                        <i class="fas fa-sign-in-alt me-2"></i>Sign In
+                    </a>
+                    {% else %}
+                    <a href="{% url 'after_login' %}" class="btn btn-light btn-lg px-4 py-3 fw-semibold shadow">
+                        <i class="fas fa-tachometer-alt me-2"></i>Go to Dashboard
+                    </a>
+                    <a href="{% url 'book_appointment' %}" class="btn btn-outline-light btn-lg px-4 py-3 fw-semibold">
+                        <i class="fas fa-calendar-plus me-2"></i>Book Appointment
+                    </a>
+                    {% endif %}
+                </div>
+                <div class="d-flex flex-wrap gap-4 mt-4">
+                    <div class="d-flex align-items-center">
+                        <div class="bg-white bg-opacity-25 rounded-circle p-2 me-2">
+                            <i class="fas fa-check text-white"></i>
+                        </div>
+                        <span>24/7 Support</span>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <div class="bg-white bg-opacity-25 rounded-circle p-2 me-2">
+                            <i class="fas fa-check text-white"></i>
+                        </div>
+                        <span>Expert Doctors</span>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <div class="bg-white bg-opacity-25 rounded-circle p-2 me-2">
+                            <i class="fas fa-check text-white"></i>
+                        </div>
+                        <span>AI Diagnostics</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-5 d-none d-lg-flex justify-content-center" data-aos="fade-left" data-aos-delay="200">
+                <div class="position-relative">
+                    <div class="animate-float">
+                        <i class="fas fa-heartbeat" style="font-size: 18rem; opacity: 0.15;"></i>
+                    </div>
+                    <div class="position-absolute" style="top: 20%; left: 10%;">
+                        <div class="bg-white rounded-3 p-3 shadow-lg animate-pulse" style="animation-delay: 0s;">
+                            <i class="fas fa-brain text-primary fa-2x"></i>
+                        </div>
+                    </div>
+                    <div class="position-absolute" style="top: 60%; right: 10%;">
+                        <div class="bg-white rounded-3 p-3 shadow-lg animate-pulse" style="animation-delay: 0.5s;">
+                            <i class="fas fa-bone text-warning fa-2x"></i>
+                        </div>
+                    </div>
+                    <div class="position-absolute" style="bottom: 10%; left: 20%;">
+                        <div class="bg-white rounded-3 p-3 shadow-lg animate-pulse" style="animation-delay: 1s;">
+                            <i class="fas fa-hand-sparkles text-success fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="section-padding" style="background: var(--bg-dark);">
+    <div class="container">
+        <div class="text-center mb-5" data-aos="fade-up">
+        
+            <h2 class="display-5 fw-bold section-title">AI-Powered Healthcare</h2>
+            <p class="section-subtitle">Cutting-edge technology meets compassionate care for comprehensive health solutions</p>
+        </div>
+        
+        <div class="row g-4">
+            <!-- AI Diagnostics -->
+            <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="100">
+                <div class="card card-modern h-100 border-0">
+                    <div class="card-body p-4">
+                        <div class="card-icon primary">
+                            <i class="fas fa-brain"></i>
+                        </div>
+                        <h4 class="fw-bold mb-3">AI Diagnostics</h4>
+                        <p class="text-muted mb-4">State-of-the-art AI models for accurate medical image analysis and disease detection.</p>
+                        <div class="d-grid gap-2">
+                            <a href="{% url 'brain_classifier' %}" class="btn btn-outline-primary rounded-pill">
+                                <i class="fas fa-brain me-2"></i>Brain Tumor Detection
+                            </a>
+                            <a href="{% url 'bones_classifier' %}" class="btn btn-outline-warning rounded-pill">
+                                <i class="fas fa-bone me-2"></i>Bone Fracture Analysis
+                            </a>
+                            <a href="{% url 'skin_detect' %}" class="btn btn-outline-success rounded-pill">
+                                <i class="fas fa-hand-sparkles me-2"></i>Skin Disease Detection
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Appointment Management -->
+            <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="200">
+                <div class="card card-modern h-100 border-0">
+                    <div class="card-body p-4">
+                        <div class="card-icon success">
+                            <i class="fas fa-calendar-check"></i>
+                        </div>
+                        <h4 class="fw-bold mb-3">Smart Appointments</h4>
+                        <p class="text-muted mb-4">Seamless online booking with doctors across all specialties.</p>
+                        <ul class="list-unstyled mb-0">
+                            <li class="d-flex align-items-center mb-3">
+                                <span class="badge bg-success bg-opacity-10 text-success rounded-circle p-2 me-3">
+                                    <i class="fas fa-check"></i>
+                                </span>
+                                <span>24/7 Online Booking</span>
+                            </li>
+                            <li class="d-flex align-items-center mb-3">
+                                <span class="badge bg-success bg-opacity-10 text-success rounded-circle p-2 me-3">
+                                    <i class="fas fa-check"></i>
+                                </span>
+                                <span>Instant Confirmations</span>
+                            </li>
+                            <li class="d-flex align-items-center mb-3">
+                                <span class="badge bg-success bg-opacity-10 text-success rounded-circle p-2 me-3">
+                                    <i class="fas fa-check"></i>
+                                </span>
+                                <span>SMS Reminders</span>
+                            </li>
+                            <li class="d-flex align-items-center">
+                                <span class="badge bg-success bg-opacity-10 text-success rounded-circle p-2 me-3">
+                                    <i class="fas fa-check"></i>
+                                </span>
+                                <span>Easy Rescheduling</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Medical Records -->
+            <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="300">
+                <div class="card card-modern h-100 border-0">
+                    <div class="card-body p-4">
+                        <div class="card-icon info">
+                            <i class="fas fa-file-medical"></i>
+                        </div>
+                        <h4 class="fw-bold mb-3">Digital Records</h4>
+                        <p class="text-muted mb-4">Secure, centralized access to your complete medical history.</p>
+                        <ul class="list-unstyled mb-0">
+                            <li class="d-flex align-items-center mb-3">
+                                <span class="badge bg-info bg-opacity-10 text-info rounded-circle p-2 me-3">
+                                    <i class="fas fa-check"></i>
+                                </span>
+                                <span>Complete Medical History</span>
+                            </li>
+                            <li class="d-flex align-items-center mb-3">
+                                <span class="badge bg-info bg-opacity-10 text-info rounded-circle p-2 me-3">
+                                    <i class="fas fa-check"></i>
+                                </span>
+                                <span>Prescription Management</span>
+                            </li>
+                            <li class="d-flex align-items-center mb-3">
+                                <span class="badge bg-info bg-opacity-10 text-info rounded-circle p-2 me-3">
+                                    <i class="fas fa-check"></i>
+                                </span>
+                                <span>Lab Results Access</span>
+                            </li>
+                            <li class="d-flex align-items-center">
+                                <span class="badge bg-info bg-opacity-10 text-info rounded-circle p-2 me-3">
+                                    <i class="fas fa-check"></i>
+                                </span>
+                                <span>Secure Cloud Storage</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Departments -->
+<section class="section-padding" style="background: var(--bg-darker);">
+    <div class="container">
+        <div class="text-center mb-5" data-aos="fade-up">
+            <span class="badge bg-warning bg-opacity-10 text-warning px-3 py-2 mb-3 fw-semibold">
+                Departments
+            </span>
+            <h2 class="display-5 fw-bold section-title">Specialized Care Units</h2>
+            <p class="section-subtitle">Expert medical teams across multiple disciplines for comprehensive healthcare</p>
+        </div>
+        
+        <div class="row g-4 mb-5">
+            <div class="col-lg-3 col-md-6" data-aos="zoom-in" data-aos-delay="100">
+                <div class="card card-modern text-center h-100 border-0">
+                    <div class="card-body p-4">
+                        <div class="rounded-circle bg-danger bg-opacity-10 d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+                            <i class="fas fa-heartbeat text-danger fa-2x"></i>
+                        </div>
+                        <h5 class="fw-bold">Cardiology</h5>
+                        <p class="text-muted mb-0 small">Heart & Cardiovascular Care</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6" data-aos="zoom-in" data-aos-delay="200">
+                <div class="card card-modern text-center h-100 border-0">
+                    <div class="card-body p-4">
+                        <div class="rounded-circle bg-primary bg-opacity-10 d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+                            <i class="fas fa-brain text-primary fa-2x"></i>
+                        </div>
+                        <h5 class="fw-bold">Neurology</h5>
+                        <p class="text-muted mb-0 small">Brain & Nervous System</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6" data-aos="zoom-in" data-aos-delay="300">
+                <div class="card card-modern text-center h-100 border-0">
+                    <div class="card-body p-4">
+                        <div class="rounded-circle bg-warning bg-opacity-10 d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+                            <i class="fas fa-bone text-warning fa-2x"></i>
+                        </div>
+                        <h5 class="fw-bold">Orthopedics</h5>
+                        <p class="text-muted mb-0 small">Bone & Joint Care</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6" data-aos="zoom-in" data-aos-delay="400">
+                <div class="card card-modern text-center h-100 border-0">
+                    <div class="card-body p-4">
+                        <div class="rounded-circle bg-info bg-opacity-10 d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+                            <i class="fas fa-baby text-info fa-2x"></i>
+                        </div>
+                        <h5 class="fw-bold">Pediatrics</h5>
+                        <p class="text-muted mb-0 small">Child Healthcare</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-lg-3 col-md-6" data-aos="zoom-in" data-aos-delay="100">
+                <div class="card card-modern text-center h-100 border-0">
+                    <div class="card-body p-4">
+                        <div class="rounded-circle bg-success bg-opacity-10 d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+                            <i class="fas fa-lungs text-success fa-2x"></i>
+                        </div>
+                        <h5 class="fw-bold">Pulmonology</h5>
+                        <p class="text-muted mb-0 small">Respiratory Care</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6" data-aos="zoom-in" data-aos-delay="200">
+                <div class="card card-modern text-center h-100 border-0">
+                    <div class="card-body p-4">
+                        <div class="rounded-circle bg-secondary bg-opacity-10 d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+                            <i class="fas fa-eye text-secondary fa-2x"></i>
+                        </div>
+                        <h5 class="fw-bold">Ophthalmology</h5>
+                        <p class="text-muted mb-0 small">Eye Care</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6" data-aos="zoom-in" data-aos-delay="300">
+                <div class="card card-modern text-center h-100 border-0">
+                    <div class="card-body p-4">
+                        <div class="rounded-circle bg-pink bg-opacity-10 d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px; background: rgba(236, 72, 153, 0.1);">
+                            <i class="fas fa-venus text-pink fa-2x" style="color: #ec4899;"></i>
+                        </div>
+                        <h5 class="fw-bold">Gynecology</h5>
+                        <p class="text-muted mb-0 small">Women's Health</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6" data-aos="zoom-in" data-aos-delay="400">
+                <div class="card card-modern text-center h-100 border-0">
+                    <div class="card-body p-4">
+                        <div class="rounded-circle bg-dark bg-opacity-10 d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+                            <i class="fas fa-tooth text-dark fa-2x"></i>
+                        </div>
+                        <h5 class="fw-bold">Dentistry</h5>
+                        <p class="text-muted mb-0 small">Dental Care</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Stats Section -->
+<section class="bg-gradient-custom text-white section-padding position-relative overflow-hidden">
+    <div class="position-absolute top-0 start-0 w-100 h-100" style="background: url('data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'0.05\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E');"></div>
+    <div class="container position-relative">
+        <div class="row text-center g-4">
+            <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="100">
+                <div class="p-4">
+                    <div class="display-3 fw-bold mb-2" data-count="5000">5,000+</div>
+                    <div class="h5 opacity-75 mb-0">Patients Served</div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="200">
+                <div class="p-4">
+                    <div class="display-3 fw-bold mb-2">50+</div>
+                    <div class="h5 opacity-75 mb-0">Expert Doctors</div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="300">
+                <div class="p-4">
+                    <div class="display-3 fw-bold mb-2">15+</div>
+                    <div class="h5 opacity-75 mb-0">Departments</div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="400">
+                <div class="p-4">
+                    <div class="display-3 fw-bold mb-2">24/7</div>
+                    <div class="h5 opacity-75 mb-0">Emergency Care</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Why Choose Us -->
+<section class="section-padding" style="background: var(--bg-dark);">
+    <div class="container">
+        <div class="row align-items-center g-5">
+            <div class="col-lg-6" data-aos="fade-right">
+                <span class="badge bg-success bg-opacity-10 text-success px-3 py-2 mb-3 fw-semibold">
+                    Why Choose Us
+                </span>
+                <h2 class="display-5 fw-bold section-title mb-4">Healthcare Excellence You Can Trust</h2>
+                <p class="text-muted mb-4">We combine advanced technology with compassionate care to provide you with the best healthcare experience. Our dedicated team is committed to your well-being.</p>
+                
+                <div class="row g-4">
+                    <div class="col-sm-6">
+                        <div class="d-flex">
+                            <div class="flex-shrink-0">
+                                <div class="bg-primary bg-opacity-10 rounded-circle p-3">
+                                    <i class="fas fa-user-md text-primary fa-lg"></i>
+                                </div>
+                            </div>
+                            <div class="ms-3">
+                                <h6 class="fw-bold mb-1">Expert Doctors</h6>
+                                <p class="text-muted small mb-0">Board-certified specialists</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="d-flex">
+                            <div class="flex-shrink-0">
+                                <div class="bg-success bg-opacity-10 rounded-circle p-3">
+                                    <i class="fas fa-robot text-success fa-lg"></i>
+                                </div>
+                            </div>
+                            <div class="ms-3">
+                                <h6 class="fw-bold mb-1">AI Technology</h6>
+                                <p class="text-muted small mb-0">Advanced diagnostics</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="d-flex">
+                            <div class="flex-shrink-0">
+                                <div class="bg-warning bg-opacity-10 rounded-circle p-3">
+                                    <i class="fas fa-clock text-warning fa-lg"></i>
+                                </div>
+                            </div>
+                            <div class="ms-3">
+                                <h6 class="fw-bold mb-1">24/7 Support</h6>
+                                <p class="text-muted small mb-0">Always available</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="d-flex">
+                            <div class="flex-shrink-0">
+                                <div class="bg-info bg-opacity-10 rounded-circle p-3">
+                                    <i class="fas fa-shield-alt text-info fa-lg"></i>
+                                </div>
+                            </div>
+                            <div class="ms-3">
+                                <h6 class="fw-bold mb-1">Secure Data</h6>
+                                <p class="text-muted small mb-0">Your privacy matters</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6" data-aos="fade-left">
+                <div class="position-relative">
+                    <div class="card card-modern border-0 shadow-lg overflow-hidden">
+                        <div class="card-body p-0">
+                            <div class="bg-gradient-custom text-white p-5 text-center">
+                                <i class="fas fa-hospital fa-5x mb-4 opacity-75"></i>
+                                <h3 class="fw-bold mb-2">Modern Healthcare Facility</h3>
+                                <p class="mb-0 opacity-75">State-of-the-art equipment and comfortable environment</p>
+                            </div>
+                            <div class="p-4">
+                                <div class="d-flex justify-content-around text-center">
+                                    <div>
+                                        <div class="h4 fw-bold text-primary mb-1">98%</div>
+                                        <small class="text-muted">Patient Satisfaction</small>
+                                    </div>
+                                    <div class="border-start"></div>
+                                    <div>
+                                        <div class="h4 fw-bold text-success mb-1">100+</div>
+                                        <small class="text-muted">Beds Available</small>
+                                    </div>
+                                    <div class="border-start"></div>
+                                    <div>
+                                        <div class="h4 fw-bold text-warning mb-1">10+</div>
+                                        <small class="text-muted">Years Experience</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="section-padding" style="background: var(--bg-darker);">
+    <div class="container">
+        <div class="card card-modern border-0 overflow-hidden" style="background: var(--gradient-primary);" data-aos="zoom-in">
+            <div class="card-body p-5 text-center text-white position-relative">
+                <div class="position-absolute top-0 start-0 w-100 h-100" style="background: url('data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'0.1\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E');"></div>
+                <div class="position-relative">
+                    <span class="badge bg-white text-primary px-3 py-2 mb-3 fw-semibold">
+                        <i class="fas fa-sparkles me-1"></i> Get Started Today
+                    </span>
+                    <h2 class="display-5 fw-bold mb-3">Ready to Experience Better Healthcare?</h2>
+                    <p class="lead mb-4 opacity-90">Join thousands of patients who trust MedCare for their healthcare needs</p>
+                    <div class="d-flex flex-wrap justify-content-center gap-3">
+                        {% if not user.is_authenticated %}
+                        <a href="{% url 'register' 'patient' %}" class="btn btn-light btn-lg px-5 py-3 fw-semibold shadow">
+                            <i class="fas fa-user-plus me-2"></i>Create Free Account
+                        </a>
+                        <a href="{% url 'contactus' %}" class="btn btn-outline-light btn-lg px-5 py-3 fw-semibold">
+                            <i class="fas fa-phone me-2"></i>Contact Us
+                        </a>
+                        {% else %}
+                        <a href="{% url 'book_appointment' %}" class="btn btn-light btn-lg px-5 py-3 fw-semibold shadow">
+                            <i class="fas fa-calendar-check me-2"></i>Book Appointment
+                        </a>
+                        <a href="{% url 'after_login' %}" class="btn btn-outline-light btn-lg px-5 py-3 fw-semibold">
+                            <i class="fas fa-tachometer-alt me-2"></i>Go to Dashboard
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

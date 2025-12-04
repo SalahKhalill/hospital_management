@@ -1,0 +1,217 @@
+{% extends "new_base.html" %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block title %}Medicine Catalog{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-5" style="min-height: 100vh;">
+    <div class="container">
+        <!-- Page Header -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <h1 class="display-5 fw-bold text-primary mb-2">
+                    <i class="fas fa-pills me-2"></i>Medicine Catalog
+                </h1>
+                <p class="text-muted fs-5">Browse our available medications and pharmacy inventory</p>
+            </div>
+            <div class="col-md-6 d-flex align-items-center justify-content-end">
+                <div class="card border-0 shadow-sm px-4 py-2">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-capsules fa-2x text-primary me-3"></i>
+                        <div>
+                            <h4 class="mb-0 fw-bold text-primary">{{ medicines.qs.count }}</h4>
+                            <small class="text-muted">Total Medicines</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search Card -->
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-body p-4">
+                <form method="get" class="row g-3 align-items-end">
+                    <div class="col-md-10">
+                        {{ medicines.form.as_p }}
+                    </div>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fas fa-search me-2"></i>Search
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Medicine Table -->
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-gradient text-white py-3" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                <h5 class="mb-0">
+                    <i class="fas fa-list-ul me-2"></i>Available Medications
+                </h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="px-4 py-3" width="25%">Medicine Name</th>
+                                <th class="py-3" width="40%">Description</th>
+                                <th class="py-3" width="15%">Price</th>
+                                <th class="py-3" width="20%">Department</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for medicine in medicines.qs %}
+                            <tr>
+                                <td class="px-4 py-3">
+                                    <div class="d-flex align-items-center">
+                                        <div class="rounded-circle bg-primary bg-opacity-10 p-2 me-3">
+                                            <i class="fas fa-prescription-bottle text-primary"></i>
+                                        </div>
+                                        <span class="fw-semibold">{{ medicine.name }}</span>
+                                    </div>
+                                </td>
+                                <td class="py-3 text-muted">{{ medicine.description|truncatewords:20 }}</td>
+                                <td class="py-3">
+                                    <span class="badge bg-success fs-6">${{ medicine.price }}</span>
+                                </td>
+                                <td class="py-3">
+                                    <span class="badge bg-info text-dark">{{ medicine.department.name }}</span>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" class="text-center py-5 text-muted">
+                                    <i class="fas fa-pills fa-3x mb-3 d-block"></i>
+                                    <p class="mb-0">No medicines found matching your search criteria</p>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Information Cards -->
+        <div class="row mt-4">
+            <div class="col-md-4 mb-3">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body text-center p-4">
+                        <div class="rounded-circle bg-primary bg-opacity-10 d-inline-flex align-items-center justify-content-center mb-3" style="width: 70px; height: 70px;">
+                            <i class="fas fa-check-circle fa-2x text-primary"></i>
+                        </div>
+                        <h5 class="fw-bold mb-2">Quality Assured</h5>
+                        <p class="text-muted small mb-0">All medications are verified and approved by health authorities</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body text-center p-4">
+                        <div class="rounded-circle bg-success bg-opacity-10 d-inline-flex align-items-center justify-content-center mb-3" style="width: 70px; height: 70px;">
+                            <i class="fas fa-shipping-fast fa-2x text-success"></i>
+                        </div>
+                        <h5 class="fw-bold mb-2">Quick Dispensing</h5>
+                        <p class="text-muted small mb-0">Fast and efficient medication dispensing service</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body text-center p-4">
+                        <div class="rounded-circle bg-info bg-opacity-10 d-inline-flex align-items-center justify-content-center mb-3" style="width: 70px; height: 70px;">
+                            <i class="fas fa-user-md fa-2x text-info"></i>
+                        </div>
+                        <h5 class="fw-bold mb-2">Expert Consultation</h5>
+                        <p class="text-muted small mb-0">Professional pharmacists available for medication guidance</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Custom styling for search form */
+    form p {
+        margin-bottom: 0;
+    }
+    
+    form input,
+    form select {
+        width: 100%;
+        padding: 10px;
+        border: 2px solid rgba(255,255,255,0.1);
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        background: var(--dark-bg, #0f172a);
+        color: var(--text-primary, #f8fafc);
+    }
+    
+    form input:focus,
+    form select:focus {
+        border-color: #667eea;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+    }
+    
+    form label {
+        font-weight: 600;
+        color: var(--text-primary, #f8fafc);
+        margin-bottom: 0.5rem;
+    }
+    
+    .table-hover tbody tr:hover {
+        background-color: rgba(102, 126, 234, 0.1);
+    }
+    
+    /* Dark theme table styling */
+    .table {
+        color: var(--text-primary, #f8fafc);
+    }
+    
+    .table thead {
+        background: var(--card-bg, #1e293b) !important;
+    }
+    
+    .table thead th {
+        color: var(--text-primary, #f8fafc) !important;
+        border-color: rgba(255,255,255,0.1) !important;
+    }
+    
+    .table tbody td {
+        color: var(--text-primary, #f8fafc) !important;
+        border-color: rgba(255,255,255,0.1) !important;
+    }
+    
+    .table-light {
+        background: var(--card-bg, #1e293b) !important;
+    }
+    
+    /* Card styling for dark theme */
+    .card {
+        background: var(--card-bg, #1e293b) !important;
+        border: none !important;
+    }
+    
+    .card-body {
+        background: var(--card-bg, #1e293b) !important;
+    }
+    
+    /* Text colors */
+    .text-muted {
+        color: rgba(248, 250, 252, 0.7) !important;
+    }
+    
+    .fw-semibold, .fw-bold, h5, h4, h1, p {
+        color: var(--text-primary, #f8fafc);
+    }
+    
+    .small, small {
+        color: rgba(248, 250, 252, 0.7) !important;
+    }
+</style>
+{% endblock %}

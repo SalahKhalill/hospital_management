@@ -1,0 +1,203 @@
+{% extends "new_base.html" %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block title %}Add {{ hospital_user }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-5" style="min-height: 100vh;">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8 col-xl-6">
+                <!-- Page Header -->
+                <div class="text-center mb-4">
+                    <h1 class="display-5 fw-bold text-primary mb-2">
+                        <i class="fas 
+                        {% if hospital_user == 'DOCTOR' %}fa-user-md
+                        {% elif hospital_user == 'NURSE' %}fa-user-nurse
+                        {% elif hospital_user == 'PATIENT' %}fa-user-injured
+                        {% elif hospital_user == 'ADMIN' %}fa-user-shield
+                        {% endif %} me-2"></i>
+                        Add New {{ hospital_user }}
+                    </h1>
+                    <p class="text-muted fs-5">Create a new {{ hospital_user|lower }} account in the system</p>
+                </div>
+
+                <!-- Main Card -->
+                <div class="card border-0 shadow-lg">
+    <div class="card-header bg-gradient text-white text-center py-4 header-gradient-{{ hospital_user|lower }}">
+                        <div class="mb-3">
+    <div class="rounded-circle bg-white d-inline-flex align-items-center justify-content-center shadow" style="width: 100px; height: 100px;">
+        <i class="fas fa-3x icon-{{ hospital_user|lower }}"></i>
+    </div>
+</div>
+                        <h4 class="mb-0">{{ hospital_user }} Registration</h4>
+                        <small class="opacity-75">Fill in the details below to create the account</small>
+                    </div>
+                    
+                    <div class="card-body p-5">
+                        <form method="post" id="addUserForm">
+                            {% csrf_token %}
+                            
+                            <div class="mb-4">
+                                <div class="alert alert-info d-flex align-items-start" role="alert">
+                                    <i class="fas fa-info-circle me-2 fa-lg mt-1"></i>
+                                    <div>
+                                        <strong>Note:</strong> 
+                                        {% if hospital_user == 'ADMIN' %}
+                                            This user will have full administrative access to the system.
+                                        {% elif hospital_user == 'DOCTOR' %}
+                                            After creation, the doctor will need to complete their profile with department and specialization information.
+                                        {% elif hospital_user == 'NURSE' %}
+                                            After creation, the nurse will need to complete their profile with department information.
+                                        {% elif hospital_user == 'PATIENT' %}
+                                            The patient account will be created with pending status and requires admin approval before login.
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Form Fields -->
+                            <div class="user-form">
+                                {{ user_form|crispy }}
+                            </div>
+
+                            <!-- Role Information -->
+                            <div class="alert alert-secondary d-flex align-items-center mb-4" role="alert">
+                                <i class="fas fa-user-tag fa-lg me-2"></i>
+                                <div>
+                                    <strong>Role:</strong> {{ hospital_user }}
+                                </div>
+                            </div>
+
+                            <!-- Submit Buttons -->
+                            <div class="d-grid gap-2 mt-4">
+                                <button type="submit" class="btn btn-primary btn-lg py-3">
+                                    <i class="fas fa-user-plus me-2"></i>Add {{ hospital_user }}
+                                </button>
+                                <a href="{% if hospital_user == 'ADMIN' %}{% url 'admin_dashboard' %}{% else %}{% url 'admin_manager' data=hospital_user %}{% endif %}" 
+                                   class="btn btn-outline-secondary">
+                                    <i class="fas fa-arrow-left me-2"></i>Cancel
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>            
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Style the form fields */
+
+
+        .icon-doctor::before { content: "\f0f0"; color: #667eea; } /* fa-user-md */
+    .icon-nurse::before { content: "\f82f"; color: #f5576c; } /* fa-user-nurse */
+    .icon-patient::before { content: "\f714"; color: #4facfe; } /* fa-user-injured */
+    .icon-admin::before { content: "\f505"; color: #fa709a; } /* fa-user-shield */
+    
+    /* Or simpler approach */
+    .icon-doctor { color: #667eea !important; }
+    .icon-nurse { color: #f5576c !important; }
+    .icon-patient { color: #4facfe !important; }
+    .icon-admin { color: #fa709a !important; }
+    .header-gradient-doctor {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    }
+    .header-gradient-nurse {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%) !important;
+    }
+    .header-gradient-patient {
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%) !important;
+    }
+    .header-gradient-admin {
+        background: linear-gradient(135deg, #fa709a 0%, #fee140 100%) !important;
+    }
+    
+ 
+    .user-form label {
+        font-weight: 600;
+        color: #2d3748;
+        margin-bottom: 0.5rem;
+    }
+    
+    .user-form input,
+    .user-form select,
+    .user-form textarea {
+        border: 2px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 12px;
+        transition: all 0.3s ease;
+    }
+    
+    .user-form input:focus,
+    .user-form select:focus,
+    .user-form textarea:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        outline: none;
+    }
+    
+    .user-form .form-control:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        font-weight: 600;
+        transition: transform 0.2s ease;
+    }
+    
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+    }
+    
+    .card {
+        transition: transform 0.3s ease;
+    }
+
+    /* Helptext styling */
+    .user-form .helptext {
+        font-size: 0.875rem;
+        color: #6c757d;
+        margin-top: 0.25rem;
+    }
+    
+    /* Error styling */
+    .user-form .invalid-feedback {
+        display: block;
+        color: #dc3545;
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+    }
+</style>
+
+<script>
+    // Add Bootstrap classes to Django form fields
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('addUserForm');
+        const inputs = form.querySelectorAll('input:not([type="hidden"]), select, textarea');
+        
+        inputs.forEach(input => {
+            if (!input.classList.contains('form-control')) {
+                input.classList.add('form-control');
+            }
+        });
+        
+        // Handle password requirements display
+        const passwordInputs = form.querySelectorAll('input[type="password"]');
+        passwordInputs.forEach(input => {
+            input.addEventListener('focus', function() {
+                const helptext = this.parentElement.querySelector('.helptext');
+                if (helptext) {
+                    helptext.style.display = 'block';
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

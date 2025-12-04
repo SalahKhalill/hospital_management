@@ -1,0 +1,342 @@
+{% extends "new_base.html" %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block title %}Discharge Patient{% endblock %}
+
+{% block extra_css %}
+<style>
+    .discharge-section {
+        padding: 40px 0 80px;
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        min-height: calc(100vh - 76px);
+    }
+    
+    .page-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 20px;
+        padding: 40px;
+        margin-bottom: 30px;
+        color: white;
+        box-shadow: 0 10px 40px rgba(102, 126, 234, 0.3);
+    }
+    
+    .page-header h2 {
+        font-weight: 700;
+        margin: 0;
+    }
+    
+    .page-header p {
+        margin: 10px 0 0;
+        opacity: 0.9;
+    }
+    
+    .breadcrumb-custom {
+        background: rgba(255,255,255,0.1);
+        border-radius: 10px;
+        padding: 10px 20px;
+        display: inline-block;
+        margin-top: 15px;
+    }
+    
+    .breadcrumb-custom a {
+        color: rgba(255,255,255,0.8);
+        text-decoration: none;
+    }
+    
+    .breadcrumb-custom a:hover {
+        color: white;
+    }
+    
+    .breadcrumb-custom span {
+        color: white;
+    }
+    
+    .discharge-card {
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        overflow: hidden;
+    }
+    
+    .card-header-custom {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        padding: 25px 30px;
+        border-bottom: 1px solid #e9ecef;
+    }
+    
+    .card-header-custom h5 {
+        margin: 0;
+        font-weight: 600;
+        color: #333;
+    }
+    
+    .card-body-custom {
+        padding: 40px;
+    }
+    
+    .discharge-icon {
+        width: 100px;
+        height: 100px;
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 30px;
+        box-shadow: 0 15px 35px rgba(40, 167, 69, 0.3);
+    }
+    
+    .discharge-icon i {
+        font-size: 45px;
+        color: white;
+    }
+    
+    .card-body-custom .form-control,
+    .card-body-custom .form-select {
+        border-radius: 10px;
+        padding: 12px 15px;
+        border: 2px solid #e9ecef;
+        transition: all 0.3s ease;
+    }
+    
+    .card-body-custom .form-control:focus,
+    .card-body-custom .form-select:focus {
+        border-color: #28a745;
+        box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.1);
+    }
+    
+    .card-body-custom label {
+        font-weight: 500;
+        color: #333;
+        margin-bottom: 8px;
+    }
+    
+    .btn-discharge {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        border: none;
+        border-radius: 10px;
+        padding: 14px 40px;
+        font-weight: 600;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-discharge:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(40, 167, 69, 0.4);
+    }
+    
+    .btn-cancel {
+        background: #6c757d;
+        border: none;
+        border-radius: 10px;
+        padding: 14px 40px;
+        font-weight: 600;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-cancel:hover {
+        background: #5a6268;
+        transform: translateY(-2px);
+    }
+    
+    .info-sidebar {
+        background: white;
+        border-radius: 20px;
+        padding: 30px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        margin-bottom: 25px;
+    }
+    
+    .info-sidebar h6 {
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #e9ecef;
+    }
+    
+    .checklist-item {
+        display: flex;
+        align-items: center;
+        padding: 12px 15px;
+        background: #f8f9fa;
+        border-radius: 10px;
+        margin-bottom: 10px;
+        transition: all 0.3s ease;
+    }
+    
+    .checklist-item:hover {
+        background: #e9ecef;
+    }
+    
+    .checklist-item:last-child {
+        margin-bottom: 0;
+    }
+    
+    .checklist-item i {
+        color: #28a745;
+        margin-right: 12px;
+        font-size: 1.1rem;
+    }
+    
+    .checklist-item span {
+        color: #555;
+        font-size: 0.9rem;
+    }
+    
+    .warning-card {
+        background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+        border-radius: 15px;
+        padding: 25px;
+        border-left: 4px solid #ff9800;
+        margin-bottom: 25px;
+    }
+    
+    .warning-card h6 {
+        color: #e65100;
+        font-weight: 600;
+        margin-bottom: 10px;
+    }
+    
+    .warning-card p {
+        color: #ef6c00;
+        margin: 0;
+        font-size: 0.9rem;
+    }
+    
+    .success-note {
+        background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+        border-radius: 15px;
+        padding: 25px;
+        border-left: 4px solid #4caf50;
+    }
+    
+    .success-note h6 {
+        color: #2e7d32;
+        font-weight: 600;
+        margin-bottom: 10px;
+    }
+    
+    .success-note ul {
+        color: #388e3c;
+        margin: 0;
+        padding-left: 20px;
+        font-size: 0.9rem;
+    }
+    
+    .success-note li {
+        margin-bottom: 5px;
+    }
+    
+    .success-note li:last-child {
+        margin-bottom: 0;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="discharge-section">
+    <div class="container">
+        <!-- Page Header -->
+        <div class="page-header" data-aos="fade-down">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h2><i class="fas fa-file-medical-alt me-3"></i>Patient Discharge</h2>
+                    <p>Create a discharge summary for patients leaving the hospital</p>
+                    <div class="breadcrumb-custom">
+                        <a href="{% url 'admin_dashboard' %}"><i class="fas fa-home me-2"></i>Dashboard</a>
+                        <span class="mx-2">/</span>
+                        <span>Discharge Patient</span>
+                    </div>
+                </div>
+                <div class="col-md-4 text-end d-none d-md-block">
+                    <i class="fas fa-hospital-user" style="font-size: 80px; opacity: 0.3;"></i>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-lg-8" data-aos="fade-up">
+                <div class="discharge-card">
+                    <div class="card-header-custom">
+                        <h5><i class="fas fa-clipboard-check me-2 text-success"></i>Discharge Form</h5>
+                    </div>
+                    <div class="card-body-custom">
+                        <div class="discharge-icon">
+                            <i class="fas fa-door-open"></i>
+                        </div>
+                        
+                        <form action="" method="post">
+                            {% csrf_token %}
+                            {{ discharge_form|crispy }}
+                            
+                            <div class="d-flex gap-3 mt-4 justify-content-center">
+                                <button class="btn btn-success btn-discharge" type="submit">
+                                    <i class="fas fa-check-circle me-2"></i>Create Discharge Summary
+                                </button>
+                                <a href="{% url 'admin_dashboard' %}" class="btn btn-secondary btn-cancel">
+                                    <i class="fas fa-times me-2"></i>Cancel
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4" data-aos="fade-up" data-aos-delay="100">
+                <div class="warning-card">
+                    <h6><i class="fas fa-exclamation-triangle me-2"></i>Important</h6>
+                    <p>Please ensure all patient information is verified before creating the discharge summary. This document will be part of the patient's permanent medical record.</p>
+                </div>
+                
+                <div class="info-sidebar">
+                    <h6><i class="fas fa-tasks me-2 text-success"></i>Discharge Checklist</h6>
+                    
+                    <div class="checklist-item">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Verify patient identity</span>
+                    </div>
+                    
+                    <div class="checklist-item">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Complete medical summary</span>
+                    </div>
+                    
+                    <div class="checklist-item">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Prescriptions provided</span>
+                    </div>
+                    
+                    <div class="checklist-item">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Follow-up appointment scheduled</span>
+                    </div>
+                    
+                    <div class="checklist-item">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Patient instructions given</span>
+                    </div>
+                    
+                    <div class="checklist-item">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Billing completed</span>
+                    </div>
+                </div>
+                
+                <div class="success-note">
+                    <h6><i class="fas fa-lightbulb me-2"></i>Discharge Tips</h6>
+                    <ul>
+                        <li>Include all diagnoses and treatments</li>
+                        <li>List medications with dosages</li>
+                        <li>Specify follow-up care instructions</li>
+                        <li>Provide emergency contact info</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

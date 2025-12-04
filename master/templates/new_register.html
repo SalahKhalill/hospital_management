@@ -1,0 +1,259 @@
+{% extends 'new_base.html' %}
+{% load static %}
+
+{% block title %}
+<title>Register - MedCare Hospital</title>
+{% endblock %}
+
+{% block content %}
+<section class="min-vh-100 d-flex align-items-center" style="background: var(--bg-darker);">
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-6 col-md-8">
+                <div class="text-center mb-4" data-aos="fade-down">
+                    <a href="{% url 'home' %}" class="text-decoration-none">
+                        <div class="d-inline-flex align-items-center justify-content-center bg-gradient-custom rounded-circle mb-3" style="width: 70px; height: 70px;">
+                            <i class="fas fa-hospital-alt text-white fa-2x"></i>
+                        </div>
+                        <h4 class="fw-bold text-gradient mb-0">MedCare</h4>
+                    </a>
+                </div>
+                
+                <div class="card card-modern shadow-lg border-0" data-aos="fade-up">
+                    <div class="card-body p-5">
+                        <div class="text-center mb-4">
+                            <span class="badge bg-success bg-opacity-10 text-success px-3 py-2 mb-2">
+                                <i class="fas fa-user-plus me-1"></i> New Account
+                            </span>
+                            <h2 class="fw-bold mb-2">Create Your Account</h2>
+                            <p class="text-muted">Join our healthcare community today</p>
+                        </div>
+
+                        {% if messages %}
+                        <div class="mb-4">
+                            {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show d-flex align-items-center" role="alert">
+                                {% if message.tags == 'success' %}
+                                <i class="fas fa-check-circle me-2"></i>
+                                {% elif message.tags == 'error' or message.tags == 'danger' %}
+                                <i class="fas fa-exclamation-circle me-2"></i>
+                                {% else %}
+                                <i class="fas fa-info-circle me-2"></i>
+                                {% endif %}
+                                {{ message }}
+                                <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+
+                        <form method="POST" action="{% url 'register' hospital_user|default:'patient' %}">
+                            {% csrf_token %}
+                            
+                            <div class="mb-4">
+                                <label for="id_username" class="form-label fw-semibold">
+                                    <i class="fas fa-at me-2 text-primary"></i>Username
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0">
+                                        <i class="fas fa-user text-muted"></i>
+                                    </span>
+                                    {{ register_form.username }}
+                                </div>
+                                <small class="text-muted"><i class="fas fa-info-circle me-1"></i>Choose a unique username</small>
+                                {% if register_form.username.errors %}
+                                <div class="text-danger small mt-1">
+                                    <i class="fas fa-exclamation-circle me-1"></i>{{ register_form.username.errors }}
+                                </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="row g-3">
+                                <div class="col-md-6 mb-3">
+                                    <label for="id_first_name" class="form-label fw-semibold">
+                                        <i class="fas fa-user me-2 text-primary"></i>First Name
+                                    </label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light border-end-0">
+                                            <i class="fas fa-id-card text-muted"></i>
+                                        </span>
+                                        {{ register_form.first_name }}
+                                    </div>
+                                    {% if register_form.first_name.errors %}
+                                    <div class="text-danger small mt-1">
+                                        <i class="fas fa-exclamation-circle me-1"></i>{{ register_form.first_name.errors }}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="id_last_name" class="form-label fw-semibold">
+                                        <i class="fas fa-user me-2 text-primary"></i>Last Name
+                                    </label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light border-end-0">
+                                            <i class="fas fa-id-card text-muted"></i>
+                                        </span>
+                                        {{ register_form.last_name }}
+                                    </div>
+                                    {% if register_form.last_name.errors %}
+                                    <div class="text-danger small mt-1">
+                                        <i class="fas fa-exclamation-circle me-1"></i>{{ register_form.last_name.errors }}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <div class="row g-3">
+                                <div class="col-md-6 mb-3">
+                                    <label for="id_password1" class="form-label fw-semibold">
+                                        <i class="fas fa-lock me-2 text-primary"></i>Password
+                                    </label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light border-end-0">
+                                            <i class="fas fa-key text-muted"></i>
+                                        </span>
+                                        {{ register_form.password1 }}
+                                    </div>
+                                    {% if register_form.password1.errors %}
+                                    <div class="text-danger small mt-1">
+                                        <i class="fas fa-exclamation-circle me-1"></i>{{ register_form.password1.errors }}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="id_password2" class="form-label fw-semibold">
+                                        <i class="fas fa-lock me-2 text-primary"></i>Confirm Password
+                                    </label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light border-end-0">
+                                            <i class="fas fa-key text-muted"></i>
+                                        </span>
+                                        {{ register_form.password2 }}
+                                    </div>
+                                    {% if register_form.password2.errors %}
+                                    <div class="text-danger small mt-1">
+                                        <i class="fas fa-exclamation-circle me-1"></i>{{ register_form.password2.errors }}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            {% if register_form.non_field_errors %}
+                            <div class="alert alert-danger d-flex align-items-center">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                {{ register_form.non_field_errors }}
+                            </div>
+                            {% endif %}
+
+                            <div class="alert alert-info d-flex align-items-center mb-4">
+                                <i class="fas fa-user-tag me-3 fa-lg"></i>
+                                <div>
+                                    <strong>Registering as:</strong> 
+                                    <span class="badge bg-primary ms-1">{{ hospital_user|title }}</span>
+                                </div>
+                            </div>
+
+                            <div class="form-check mb-4">
+                                <input class="form-check-input" type="checkbox" id="terms" required style="width: 18px; height: 18px;">
+                                <label class="form-check-label ms-1" for="terms">
+                                    I agree to the <a href="#" class="text-primary text-decoration-none">Terms of Service</a> and <a href="#" class="text-primary text-decoration-none">Privacy Policy</a>
+                                </label>
+                            </div>
+
+                            <div class="d-grid mb-4">
+                                <button type="submit" class="btn btn-success-custom btn-lg py-3">
+                                    <i class="fas fa-user-plus me-2"></i>Create Account
+                                </button>
+                            </div>
+
+                            <div class="text-center">
+                                <p class="text-muted mb-0">
+                                    Already have an account? 
+                                    <a href="{% url 'login' hospital_user|default:'patient' %}" class="fw-bold text-primary text-decoration-none">
+                                        Sign In
+                                    </a>
+                                </p>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                
+                <!-- Benefits -->
+                <div class="row mt-4 g-3" data-aos="fade-up" data-aos-delay="100">
+                    <div class="col-md-4">
+                        <div class="text-center">
+                            <i class="fas fa-calendar-check text-primary fa-lg mb-2"></i>
+                            <p class="small text-muted mb-0">Easy Appointment Booking</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="text-center">
+                            <i class="fas fa-file-medical text-success fa-lg mb-2"></i>
+                            <p class="small text-muted mb-0">Digital Health Records</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="text-center">
+                            <i class="fas fa-robot text-info fa-lg mb-2"></i>
+                            <p class="small text-muted mb-0">AI Diagnostics Access</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+/* Custom form styles for register page */
+.input-group .form-control {
+    border-left: none !important;
+    border-radius: 0 var(--border-radius) var(--border-radius) 0 !important;
+    background: var(--card-dark) !important;
+    border-color: var(--card-border) !important;
+    color: var(--text-primary) !important;
+}
+
+.input-group .form-control::placeholder {
+    color: var(--text-muted) !important;
+}
+
+.input-group-text {
+    border-radius: var(--border-radius) 0 0 var(--border-radius) !important;
+    border-right: none !important;
+    background: var(--card-dark) !important;
+    border-color: var(--card-border) !important;
+    color: var(--text-muted) !important;
+}
+
+.input-group:focus-within .input-group-text {
+    border-color: var(--primary-color);
+}
+
+.input-group:focus-within .form-control {
+    border-color: var(--primary-color);
+}
+
+.form-check-input:checked {
+    background-color: var(--success-color);
+    border-color: var(--success-color);
+}
+</style>
+
+<script>
+// Add Bootstrap classes to form fields
+document.addEventListener('DOMContentLoaded', function() {
+    const inputs = document.querySelectorAll('input[type="text"], input[type="password"]');
+    inputs.forEach(input => {
+        input.classList.add('form-control', 'border-start-0');
+        
+        // Add placeholders
+        if (input.id === 'id_username') input.placeholder = 'Choose a username';
+        if (input.id === 'id_first_name') input.placeholder = 'First name';
+        if (input.id === 'id_last_name') input.placeholder = 'Last name';
+        if (input.id === 'id_password1') input.placeholder = 'Create password';
+        if (input.id === 'id_password2') input.placeholder = 'Confirm password';
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,215 @@
+{% extends "new_base.html" %}
+{% load static %}
+
+{% block title %}Discharge Summary{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-5" style="min-height: 100vh;">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-10 col-xl-8">
+                <!-- Page Header -->
+                <div class="text-center mb-4">
+                    <h1 class="display-5 fw-bold text-primary mb-2">
+                        <i class="fas fa-file-invoice-dollar me-2"></i>Discharge Summary
+                    </h1>
+                    <p class="text-muted fs-5">Patient discharge details and billing information</p>
+                </div>
+
+                <!-- Invoice Card -->
+                <div class="card border-0 shadow-lg">
+                    <!-- Header -->
+                    <div class="card-header bg-gradient text-white py-4" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                        <div class="row align-items-center">
+                            <div class="col-md-6">
+                                <h3 class="mb-0">
+                                    <i class="fas fa-hospital me-2"></i>Hospital Management
+                                </h3>
+                            </div>
+                            <div class="col-md-6 text-md-end">
+                                <p class="mb-0 opacity-75">
+                                    <i class="fas fa-calendar me-2"></i>Admission Date: {{ discharge_form.admit_date }}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card-body p-5">
+                        <!-- Patient & Doctor Info -->
+                        <div class="row mb-5">
+                            <div class="col-md-6">
+                                <div class="card bg-light border-0 h-100">
+                                    <div class="card-body">
+                                        <h5 class="card-title mb-3">
+                                            <i class="fas fa-user text-primary me-2"></i>Patient Information
+                                        </h5>
+                                        <p class="mb-2">
+                                            <strong>Name:</strong> {{ discharge_form.appointment.patient }}
+                                        </p>
+                                        <p class="mb-2">
+                                            <strong>Contact:</strong> {{ discharge_form.appointment.patient.mobile }}
+                                        </p>
+                                        <p class="mb-0">
+                                            <strong>Address:</strong> {{ discharge_form.appointment.patient.location }}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card bg-light border-0 h-100">
+                                    <div class="card-body">
+                                        <h5 class="card-title mb-3">
+                                            <i class="fas fa-user-md text-success me-2"></i>Doctor Information
+                                        </h5>
+                                        <p class="mb-2">
+                                            <strong>Name:</strong> {{ discharge_form.appointment.doctor }}
+                                        </p>
+                                        <p class="mb-2">
+                                            <strong>Department:</strong> {{ discharge_form.appointment.doctor.department }}
+                                        </p>
+                                        <p class="mb-0">
+                                            <strong>Specialization:</strong> {{ discharge_form.appointment.doctor.specialization }}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Medical Report -->
+                        <div class="mb-5">
+                            <h5 class="mb-3">
+                                <i class="fas fa-notes-medical text-info me-2"></i>Medical Report
+                            </h5>
+                            <div class="card bg-light border-0">
+                                <div class="card-body">
+                                    <p class="mb-0">{{ discharge_form.doctor_report }}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Billing Details -->
+                        <div class="mb-5">
+                            <h5 class="mb-3">
+                                <i class="fas fa-receipt text-warning me-2"></i>Billing Details
+                            </h5>
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Description</th>
+                                            <th class="text-end">Amount</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>
+                                                <i class="fas fa-bed text-muted me-2"></i>Room Charges
+                                            </td>
+                                            <td class="text-end">{{ discharge_form.room_charge }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <i class="fas fa-user-md text-muted me-2"></i>Doctor's Fee
+                                            </td>
+                                            <td class="text-end">{{ discharge_form.doctor_fee }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <i class="fas fa-pills text-muted me-2"></i>Medicine Cost
+                                            </td>
+                                            <td class="text-end">{{ discharge_form.medicine_cost }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <i class="fas fa-plus-circle text-muted me-2"></i>Other Charges
+                                            </td>
+                                            <td class="text-end">{{ discharge_form.other_charge }}</td>
+                                        </tr>
+                                    </tbody>
+                                    <tfoot>
+                                        <tr class="table-primary">
+                                            <th>
+                                                <i class="fas fa-calculator me-2"></i>Total Amount
+                                            </th>
+                                            <th class="text-end fs-5">{{ discharge_form.total }}</th>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Payment Status & Actions -->
+                        <div class="row">
+                            <div class="col-md-6 mb-3 mb-md-0">
+                                {% if discharge_form.is_paid %}
+                                <div class="alert alert-success d-flex align-items-center mb-0" role="alert">
+                                    <i class="fas fa-check-circle fa-2x me-3"></i>
+                                    <div>
+                                        <h6 class="alert-heading mb-1">Payment Successful</h6>
+                                        <p class="mb-0 small">All charges have been paid.</p>
+                                    </div>
+                                </div>
+                                {% else %}
+                                <div class="alert alert-warning d-flex align-items-center mb-0" role="alert">
+                                    <i class="fas fa-exclamation-triangle fa-2x me-3"></i>
+                                    <div>
+                                        <h6 class="alert-heading mb-1">Payment Pending</h6>
+                                        <p class="mb-0 small">Please complete the payment to process discharge.</p>
+                                    </div>
+                                </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <div class="d-grid gap-2">
+                                    {% if not discharge_form.is_paid %}
+                                    <a href="{% url 'pay_discharge' id=discharge_form.id %}" class="btn btn-success btn-lg">
+                                        <i class="fas fa-credit-card me-2"></i>Pay Discharge Charges
+                                    </a>
+                                    {% endif %}
+                                    <a href="{% url 'download_permit_pdf' id=discharge_form.id %}" class="btn btn-primary btn-lg">
+                                        <i class="fas fa-download me-2"></i>Download PDF
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Footer -->
+                    <div class="card-footer bg-light py-3">
+                        <div class="row align-items-center">
+                            <div class="col-md-6">
+                                <small class="text-muted">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    This is an official discharge document from Hospital Management System.
+                                </small>
+                            </div>
+                            <div class="col-md-6 text-md-end">
+                                <a href="{% url 'admin_dashboard' %}" class="btn btn-outline-secondary btn-sm">
+                                    <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .table th, .table td {
+        padding: 1rem;
+    }
+    .table tfoot th {
+        border-top: 2px solid #dee2e6;
+    }
+    @media print {
+        .btn {
+            display: none !important;
+        }
+        .card {
+            box-shadow: none !important;
+        }
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,546 @@
+{% extends "new_base.html" %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block title %}Manage {{ data_name }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-5" style="min-height: 100vh;">
+    <div class="container">
+        <!-- Page Header -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <h1 class="display-5 fw-bold text-primary mb-2">
+                    <i class="fas {% if data_name == 'DOCTOR' %}fa-user-md{% elif data_name == 'NURSE' %}fa-user-nurse{% elif data_name == 'PATIENT' %}fa-user-injured{% elif data_name == 'DEPARTMENT' %}fa-hospital{% elif data_name == 'MEDICINE' %}fa-pills{% elif data_name == 'APPOINTMENT' %}fa-calendar-check{% endif %} me-2"></i>
+                    {{ data_name }} Management
+                </h1>
+                <p class="text-muted">View and manage all {{ data_name|lower }}s</p>
+            </div>
+            <div class="col-md-6 text-end d-flex align-items-center justify-content-end">
+                {% if data_name == 'DOCTOR' %}
+                    <a href="{% url 'admin_add_user' hospital_user='DOCTOR' %}" class="btn btn-primary btn-lg">
+                        <i class="fas fa-plus-circle me-2"></i>Add New Doctor
+                    </a>
+                {% elif data_name == 'NURSE' %}
+                    <a href="{% url 'admin_add_user' hospital_user='NURSE' %}" class="btn btn-primary btn-lg">
+                        <i class="fas fa-plus-circle me-2"></i>Add New Nurse
+                    </a>
+                {% elif data_name == 'PATIENT' %}
+                    <a href="{% url 'admin_add_user' hospital_user='PATIENT' %}" class="btn btn-primary btn-lg">
+                        <i class="fas fa-plus-circle me-2"></i>Add New Patient
+                    </a>
+                {% elif data_name == 'DEPARTMENT' %}
+                    <a href="{% url 'admin_add_department' %}" class="btn btn-primary btn-lg">
+                        <i class="fas fa-plus-circle me-2"></i>Add New Department
+                    </a>
+                {% elif data_name == 'MEDICINE' %}
+                    <a href="{% url 'admin_add_medicine' %}" class="btn btn-primary btn-lg">
+                        <i class="fas fa-plus-circle me-2"></i>Add New Medicine
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Search Filter Card -->
+        <div class="search-filter-card">
+            <h6 class="mb-3"><i class="fas fa-filter me-2 text-primary"></i>Filter {{ data_name }}</h6>
+            <form method="get" class="row align-items-end">
+                <div class="col-md-10">
+                    <div class="row">
+                        {{ data_table.form.as_p }}
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-search me-1"></i>Search
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Main Card -->
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-gradient text-white py-3" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <h5 class="mb-0">
+                            <i class="fas fa-list me-2"></i>{{ data_name }} List
+                        </h5>
+                    </div>
+                    <div class="col-md-6 text-end">
+                        <span class="badge bg-light text-dark">
+                            {{ data_table.qs.count }} records found
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <!-- DOCTOR TABLE -->
+                    {% if data_name == 'DOCTOR' %}
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="px-4 py-3">ID</th>
+                                <th class="py-3">Name</th>
+                                <th class="py-3">Department</th>
+                                <th class="py-3">Specialization</th>
+                                <th class="py-3">Email</th>
+                                <th class="py-3">Status</th>
+                                <th class="py-3 text-center">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for doctor in data_table.qs %}
+                            <tr>
+                                <td class="px-4 py-3 fw-bold text-primary">#{{ doctor.id }}</td>
+                                <td class="py-3">
+                                    <div class="d-flex align-items-center">
+                                        <img src="{{ doctor.profile_pic.url }}" alt="{{ doctor.get_name }}" class="rounded-circle me-2" width="40" height="40" style="object-fit: cover;">
+                                        <span class="fw-semibold">Dr. {{ doctor.get_name }}</span>
+                                    </div>
+                                </td>
+                                <td class="py-3">{{ doctor.department.name }}</td>
+                                <td class="py-3">{{ doctor.specialization|default:"N/A" }}</td>
+                                <td class="py-3">{{ doctor.user.email }}</td>
+                                <td class="py-3">
+                                    {% if doctor.user.is_active %}
+                                        <span class="badge bg-success">Active</span>
+                                    {% else %}
+                                        <span class="badge bg-warning">Pending</span>
+                                    {% endif %}
+                                </td>
+                                <td class="py-3 text-center">
+                                    <div class="btn-group" role="group">
+                                        {% if doctor.user.is_active %}
+                                            <a href="{% url 'admin_update_user' id=doctor.user.id %}" class="btn btn-sm btn-outline-primary" title="Edit">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                        {% else %}
+                                            <a href="{% url 'admin_confirm_user' id=doctor.user.id %}" class="btn btn-sm btn-outline-success" title="Confirm">
+                                                <i class="fas fa-check"></i>
+                                            </a>
+                                        {% endif %}
+                                        <a href="{% url 'admin_delete_user' id=doctor.user.id %}" class="btn btn-sm btn-outline-danger" title="Delete" onclick="return confirm('Are you sure you want to delete Dr. {{ doctor.get_name }}?');">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="7" class="text-center py-5 text-muted">
+                                    <i class="fas fa-user-md fa-3x mb-3 d-block"></i>
+                                    No doctors found
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+
+                    <!-- NURSE TABLE -->
+                    {% elif data_name == 'NURSE' %}
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="px-4 py-3">ID</th>
+                                <th class="py-3">Name</th>
+                                <th class="py-3">Department</th>
+                                <th class="py-3">Email</th>
+                                <th class="py-3">Status</th>
+                                <th class="py-3 text-center">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for nurse in data_table.qs %}
+                            <tr>
+                                <td class="px-4 py-3 fw-bold text-primary">#{{ nurse.id }}</td>
+                                <td class="py-3">
+                                    <div class="d-flex align-items-center">
+                                        <img src="{{ nurse.profile_pic.url }}" alt="{{ nurse.get_name }}" class="rounded-circle me-2" width="40" height="40" style="object-fit: cover;">
+                                        <span class="fw-semibold">{{ nurse.get_name }}</span>
+                                    </div>
+                                </td>
+                                <td class="py-3">{{ nurse.department.name }}</td>
+                                <td class="py-3">{{ nurse.user.email }}</td>
+                                <td class="py-3">
+                                    {% if nurse.user.is_active %}
+                                        <span class="badge bg-success">Active</span>
+                                    {% else %}
+                                        <span class="badge bg-warning">Pending</span>
+                                    {% endif %}
+                                </td>
+                                <td class="py-3 text-center">
+                                    <div class="btn-group" role="group">
+                                        {% if nurse.user.is_active %}
+                                            <a href="{% url 'admin_update_user' id=nurse.user.id %}" class="btn btn-sm btn-outline-primary" title="Edit">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                        {% else %}
+                                            <a href="{% url 'admin_confirm_user' id=nurse.user.id %}" class="btn btn-sm btn-outline-success" title="Confirm">
+                                                <i class="fas fa-check"></i>
+                                            </a>
+                                        {% endif %}
+                                        <a href="{% url 'admin_delete_user' id=nurse.user.id %}" class="btn btn-sm btn-outline-danger" title="Delete" onclick="return confirm('Are you sure you want to delete {{ nurse.get_name }}?');">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="6" class="text-center py-5 text-muted">
+                                    <i class="fas fa-user-nurse fa-3x mb-3 d-block"></i>
+                                    No nurses found
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+
+                    <!-- PATIENT TABLE -->
+                    {% elif data_name == 'PATIENT' %}
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="px-4 py-3">ID</th>
+                                <th class="py-3">Name</th>
+                                <th class="py-3">Assigned Doctor</th>
+                                <th class="py-3">Email</th>
+                                <th class="py-3">Status</th>
+                                <th class="py-3 text-center">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for patient in data_table.qs %}
+                            <tr>
+                                <td class="px-4 py-3 fw-bold text-primary">#{{ patient.id }}</td>
+                                <td class="py-3">
+                                    <div class="d-flex align-items-center">
+                                        <img src="{{ patient.profile_pic.url }}" alt="{{ patient.get_name }}" class="rounded-circle me-2" width="40" height="40" style="object-fit: cover;">
+                                        <span class="fw-semibold">{{ patient.get_name }}</span>
+                                    </div>
+                                </td>
+                                <td class="py-3">
+                                    {% if patient.assigned_doctor %}
+                                        Dr. {{ patient.assigned_doctor.get_name }}
+                                    {% else %}
+                                        <span class="text-muted">Not assigned</span>
+                                    {% endif %}
+                                </td>
+                                <td class="py-3">{{ patient.user.email }}</td>
+                                <td class="py-3">
+                                    {% if patient.user.is_active %}
+                                        <span class="badge bg-success">Active</span>
+                                    {% else %}
+                                        <span class="badge bg-warning">Pending</span>
+                                    {% endif %}
+                                </td>
+                                <td class="py-3 text-center">
+                                    <div class="btn-group" role="group">
+                                        {% if patient.user.is_active %}
+                                            <a href="{% url 'admin_update_user' id=patient.user.id %}" class="btn btn-sm btn-outline-primary" title="Edit">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                        {% else %}
+                                            <a href="{% url 'admin_confirm_user' id=patient.user.id %}" class="btn btn-sm btn-outline-success" title="Confirm">
+                                                <i class="fas fa-check"></i>
+                                            </a>
+                                        {% endif %}
+                                        <a href="{% url 'admin_delete_user' id=patient.user.id %}" class="btn btn-sm btn-outline-danger" title="Delete" onclick="return confirm('Are you sure you want to delete {{ patient.get_name }}?');">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="6" class="text-center py-5 text-muted">
+                                    <i class="fas fa-user-injured fa-3x mb-3 d-block"></i>
+                                    No patients found
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+
+                    <!-- DEPARTMENT TABLE -->
+                    {% elif data_name == 'DEPARTMENT' %}
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="px-4 py-3">ID</th>
+                                <th class="py-3">Department Name</th>
+                                <th class="py-3">Description</th>
+                                <th class="py-3 text-center">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for department in data_table.qs %}
+                            <tr>
+                                <td class="px-4 py-3 fw-bold text-primary">#{{ department.id }}</td>
+                                <td class="py-3">
+                                    <div class="d-flex align-items-center">
+                                        {% if department.department_image %}
+                                        <img src="{{ department.department_image.url }}" alt="{{ department.name }}" class="rounded me-2" width="40" height="40" style="object-fit: cover;">
+                                        {% endif %}
+                                        <span class="fw-semibold">{{ department.name }}</span>
+                                    </div>
+                                </td>
+                                <td class="py-3">{{ department.description|truncatewords:15 }}</td>
+                                <td class="py-3 text-center">
+                                    <div class="btn-group" role="group">
+                                        <a href="{% url 'admin_update_department' id=department.id %}" class="btn btn-sm btn-outline-primary" title="Edit">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <a href="{% url 'admin_delete_department' id=department.id %}" class="btn btn-sm btn-outline-danger" title="Delete" onclick="return confirm('Are you sure you want to delete {{ department.name }}?');">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" class="text-center py-5 text-muted">
+                                    <i class="fas fa-hospital fa-3x mb-3 d-block"></i>
+                                    No departments found
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+
+                    <!-- MEDICINE TABLE -->
+                    {% elif data_name == 'MEDICINE' %}
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="px-4 py-3">ID</th>
+                                <th class="py-3">Medicine Name</th>
+                                <th class="py-3">Description</th>
+                                <th class="py-3 text-center">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for medicine in data_table.qs %}
+                            <tr>
+                                <td class="px-4 py-3 fw-bold text-primary">#{{ medicine.id }}</td>
+                                <td class="py-3 fw-semibold">{{ medicine.name }}</td>
+                                <td class="py-3">{{ medicine.description|truncatewords:15 }}</td>
+                                <td class="py-3 text-center">
+                                    <div class="btn-group" role="group">
+                                        <a href="{% url 'admin_update_medicine' id=medicine.id %}" class="btn btn-sm btn-outline-primary" title="Edit">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <a href="{% url 'admin_delete_medicine' id=medicine.id %}" class="btn btn-sm btn-outline-danger" title="Delete" onclick="return confirm('Are you sure you want to delete {{ medicine.name }}?');">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" class="text-center py-5 text-muted">
+                                    <i class="fas fa-pills fa-3x mb-3 d-block"></i>
+                                    No medicines found
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+
+                    <!-- APPOINTMENT TABLE -->
+                    {% elif data_name == 'APPOINTMENT' %}
+                    {% load tz %}
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="px-4 py-3">ID</th>
+                                <th class="py-3">Patient</th>
+                                <th class="py-3">Doctor</th>
+                                <th class="py-3">Date</th>
+                                <th class="py-3">Status</th>
+                                <th class="py-3 text-center">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% now "Y-m-d" as today %}
+                            {% for appointment in data_table.qs %}
+                            <tr>
+                                <td class="px-4 py-3 fw-bold text-primary">#{{ appointment.id }}</td>
+                                <td class="py-3">{{ appointment.patient.get_name }}</td>
+                                <td class="py-3">Dr. {{ appointment.doctor.get_name }}</td>
+                                <td class="py-3">{{ appointment.appointment_date|date:"M d, Y" }}</td>
+                                <td class="py-3">
+                                    {% if appointment.is_done %}
+                                        <span class="badge bg-info">Discharged</span>
+                                    {% elif appointment.status %}
+                                        <span class="badge bg-success">Confirmed</span>
+                                    {% else %}
+                                        <span class="badge bg-warning">Pending</span>
+                                    {% endif %}
+                                </td>
+                                <td class="py-3 text-center">
+                                    <div class="btn-group" role="group">
+                                        {% if not appointment.status and not appointment.is_done %}
+                                            <a href="{% url 'admin_confirm_appointment' id=appointment.id %}" class="btn btn-sm btn-outline-success" title="Confirm">
+                                                <i class="fas fa-check"></i>
+                                            </a>
+                                        {% endif %}
+                                        {% if appointment.status and not appointment.is_done and appointment.appointment_date|date:"Y-m-d" <= today %}
+                                            <a href="{% url 'admin_discharge_patient' id=appointment.id %}" class="btn btn-sm btn-success" title="Discharge Patient">
+                                                <i class="fas fa-file-medical"></i> Discharge
+                                            </a>
+                                        {% endif %}
+                                        {% if appointment.is_done %}
+                                            <a href="{% url 'final_discharge' id=appointment.id %}" class="btn btn-sm btn-outline-info" title="View Discharge">
+                                                <i class="fas fa-eye"></i> View
+                                            </a>
+                                        {% endif %}
+                                        <a href="{% url 'admin_delete_appointment' id=appointment.id %}" class="btn btn-sm btn-outline-danger" title="Delete" onclick="return confirm('Are you sure you want to delete this appointment?');">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="6" class="text-center py-5 text-muted">
+                                    <i class="fas fa-calendar-check fa-3x mb-3 d-block"></i>
+                                    No appointments found
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Back to Dashboard Button -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <a href="{% url 'admin_dashboard' %}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .table-hover tbody tr:hover {
+        background-color: rgba(102, 126, 234, 0.1);
+    }
+    
+    .btn-group .btn {
+        margin: 0 2px;
+    }
+    
+    /* Dark theme table styling */
+    .table {
+        color: var(--text-primary, #f8fafc);
+    }
+    
+    .table thead {
+        background: var(--card-bg, #1e293b) !important;
+    }
+    
+    .table thead th {
+        color: var(--text-primary, #f8fafc) !important;
+        border-color: rgba(255,255,255,0.1) !important;
+    }
+    
+    .table tbody td {
+        color: var(--text-primary, #f8fafc) !important;
+        border-color: rgba(255,255,255,0.1) !important;
+    }
+    
+    .table tbody tr {
+        background: transparent;
+    }
+    
+    .table-light {
+        background: var(--card-bg, #1e293b) !important;
+    }
+    
+    /* Table text colors */
+    .table .fw-semibold,
+    .table span:not(.badge) {
+        color: var(--text-primary, #f8fafc) !important;
+    }
+    
+    .table .text-muted {
+        color: rgba(248, 250, 252, 0.6) !important;
+    }
+    
+    /* Custom search form styling */
+    .search-filter-card {
+        background: var(--card-bg, #1e293b);
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    }
+    
+    .search-filter-card label {
+        color: var(--text-primary, #f8fafc) !important;
+        font-weight: 600;
+        font-size: 0.9rem;
+        margin-bottom: 5px;
+    }
+    
+    .search-filter-card p {
+        margin-bottom: 15px;
+    }
+    
+    .search-filter-card input,
+    .search-filter-card select {
+        border-radius: 8px;
+        border: 2px solid rgba(255,255,255,0.1);
+        padding: 8px 12px;
+        width: 100%;
+        transition: all 0.3s ease;
+        background: var(--dark-bg, #0f172a);
+        color: var(--text-primary, #f8fafc);
+    }
+    
+    .search-filter-card input:focus,
+    .search-filter-card select:focus {
+        border-color: #667eea;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+    }
+    
+    /* Header search form styling */
+    .card-header form p {
+        margin: 0;
+        display: none;
+    }
+    
+    .card-header form input,
+    .card-header form select {
+        border-radius: 5px;
+        border: 1px solid rgba(255,255,255,0.2);
+        padding: 5px 10px;
+        background: var(--dark-bg, #0f172a);
+        color: var(--text-primary, #f8fafc);
+    }
+    
+    /* Card styling for dark theme */
+    .card {
+        background: var(--card-bg, #1e293b) !important;
+        border: none !important;
+    }
+    
+    .card-header {
+        background: var(--card-bg, #1e293b) !important;
+        border-bottom: 1px solid rgba(255,255,255,0.1) !important;
+    }
+    
+    .card-header h5 {
+        color: var(--text-primary, #f8fafc) !important;
+    }
+</style>
+{% endblock %}

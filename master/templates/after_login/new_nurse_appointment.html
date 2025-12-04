@@ -1,0 +1,164 @@
+{% extends "new_base.html" %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block title %}Nurse Appointments{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-5" style="min-height: 100vh;">
+    <div class="container">
+        <!-- Page Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h1 class="display-5 fw-bold text-primary mb-2">
+                    <i class="fas fa-calendar-check me-2"></i>Patient Appointments
+                </h1>
+                <p class="text-muted">View and manage patient appointments</p>
+            </div>
+            <div>
+                <a href="{% url 'nurse_dashboard' %}" class="btn btn-outline-secondary me-2">
+                    <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+                </a>
+                <a href="{% url 'book_appointment' %}" class="btn btn-success">
+                    <i class="fas fa-plus me-2"></i>New Appointment
+                </a>
+            </div>
+        </div>
+
+        <!-- Filter Card -->
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-white py-3">
+                <h5 class="mb-0">
+                    <i class="fas fa-filter me-2 text-primary"></i>Filter Appointments
+                </h5>
+            </div>
+            <div class="card-body">
+                <form method="get" class="row g-3">
+                    {{ appointments.form|crispy }}
+                    <div class="col-12">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-search me-2"></i>Search
+                        </button>
+                        <a href="{% url 'nurse_appointment' %}" class="btn btn-outline-secondary ms-2">
+                            <i class="fas fa-times me-2"></i>Clear
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Appointments Table -->
+        <div class="card border-0 shadow-lg">
+            <div class="card-header bg-gradient text-white py-3" style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="fas fa-list me-2"></i>Appointments List
+                    </h5>
+                    <span class="badge bg-white text-success">{{ appointments.qs|length }} appointments</span>
+                </div>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="py-3 px-4">
+                                    <i class="fas fa-user me-2 text-primary"></i>Patient
+                                </th>
+                                <th class="py-3 px-4">
+                                    <i class="fas fa-user-md me-2 text-primary"></i>Doctor
+                                </th>
+                                <th class="py-3 px-4">
+                                    <i class="fas fa-clock me-2 text-primary"></i>Time
+                                </th>
+                                <th class="py-3 px-4">
+                                    <i class="fas fa-calendar me-2 text-primary"></i>Date
+                                </th>
+                                <th class="py-3 px-4 text-center">
+                                    <i class="fas fa-sign-out-alt me-2 text-primary"></i>Discharge Status
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for appointment in appointments.qs %}
+                            <tr>
+                                <td class="py-3 px-4">
+                                    <div class="d-flex align-items-center">
+                                        <div class="avatar-sm bg-info bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 45px; height: 45px;">
+                                            <i class="fas fa-user text-info"></i>
+                                        </div>
+                                        <div>
+                                            <h6 class="mb-0">{{ appointment.patient.get_name }}</h6>
+                                            <small class="text-muted">Patient</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="py-3 px-4">
+                                    <div class="d-flex align-items-center">
+                                        <div class="avatar-sm bg-primary bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 45px; height: 45px;">
+                                            <i class="fas fa-user-md text-primary"></i>
+                                        </div>
+                                        <div>
+                                            <h6 class="mb-0">{{ appointment.doctor.get_name }}</h6>
+                                            <small class="text-muted">Doctor</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="py-3 px-4">
+                                    <span class="badge bg-info bg-opacity-10 text-info px-3 py-2">
+                                        <i class="fas fa-clock me-1"></i>{{ appointment.appointment_time }}
+                                    </span>
+                                </td>
+                                <td class="py-3 px-4">
+                                    <span class="badge bg-secondary bg-opacity-10 text-secondary px-3 py-2">
+                                        <i class="fas fa-calendar me-1"></i>{{ appointment.appointment_date }}
+                                    </span>
+                                </td>
+                                <td class="py-3 px-4 text-center">
+                                    {% if appointment.is_done %}
+                                    <span class="badge bg-success px-3 py-2">
+                                        <i class="fas fa-check-circle me-1"></i>Discharged
+                                    </span>
+                                    {% else %}
+                                    <span class="badge bg-warning text-dark px-3 py-2">
+                                        <i class="fas fa-hourglass-half me-1"></i>Pending
+                                    </span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5" class="text-center py-5">
+                                    <div class="text-muted">
+                                        <i class="fas fa-calendar-times fa-3x mb-3 opacity-50"></i>
+                                        <p class="mb-0">No appointments found</p>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .filter-card label {
+        color: #333;
+        font-weight: 600;
+    }
+    .table th {
+        font-weight: 600;
+        color: #495057;
+        border-bottom: 2px solid #dee2e6;
+    }
+    .table td {
+        border-bottom: 1px solid #f1f1f1;
+    }
+    .table tbody tr:hover {
+        background-color: #f8f9fa;
+    }
+</style>
+{% endblock %}

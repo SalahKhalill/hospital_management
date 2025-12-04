@@ -1,0 +1,206 @@
+{% extends "new_base.html" %}
+{% load static %}
+
+{% block title %}About Us{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="hero-section text-white text-center py-5">
+    <div class="container py-5">
+        <h1 class="display-3 fw-bold mb-3">About Our Hospital</h1>
+        <p class="lead fs-4">Providing exceptional healthcare with compassion and excellence since 1985</p>
+    </div>
+</div>
+
+<!-- Mission & Vision Section -->
+<div class="container py-5">
+    <div class="row g-4 mb-5">
+        <div class="col-md-6">
+            <div class="card border-0 shadow-lg h-100">
+                <div class="card-body p-5">
+                    <div class="mb-4">
+                        <div class="rounded-circle bg-primary bg-opacity-10 d-inline-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+                            <i class="fas fa-bullseye fa-2x text-primary"></i>
+                        </div>
+                    </div>
+                    <h2 class="fw-bold text-primary mb-3">Our Mission</h2>
+                    <p class="text-muted fs-5 mb-0">
+                        To provide comprehensive, patient-centered healthcare services with compassion, dignity, and respect. 
+                        We strive to deliver the highest quality medical care through innovation, continuous improvement, 
+                        and collaboration with our community.
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card border-0 shadow-lg h-100">
+                <div class="card-body p-5">
+                    <div class="mb-4">
+                        <div class="rounded-circle bg-success bg-opacity-10 d-inline-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+                            <i class="fas fa-eye fa-2x text-success"></i>
+                        </div>
+                    </div>
+                    <h2 class="fw-bold text-success mb-3">Our Vision</h2>
+                    <p class="text-muted fs-5 mb-0">
+                        To be the leading healthcare institution recognized for excellence in patient care, medical education, 
+                        and research. We envision a healthier community where every individual has access to world-class 
+                        healthcare services.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Values Section -->
+    <div class="text-center mb-5">
+        <h2 class="display-5 fw-bold text-primary mb-4">Our Core Values</h2>
+        <p class="text-muted fs-5 mb-5">The principles that guide everything we do</p>
+    </div>
+
+    <div class="row g-4 mb-5">
+        <div class="col-md-3 col-sm-6">
+            <div class="card border-0 shadow-sm text-center h-100 hover-lift">
+                <div class="card-body p-4">
+                    <div class="rounded-circle bg-primary bg-opacity-10 d-inline-flex align-items-center justify-content-center mb-3" style="width: 70px; height: 70px;">
+                        <i class="fas fa-heart fa-2x text-primary"></i>
+                    </div>
+                    <h5 class="fw-bold mb-2">Compassion</h5>
+                    <p class="text-muted small mb-0">Caring for every patient with empathy and understanding</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6">
+            <div class="card border-0 shadow-sm text-center h-100 hover-lift">
+                <div class="card-body p-4">
+                    <div class="rounded-circle bg-success bg-opacity-10 d-inline-flex align-items-center justify-content-center mb-3" style="width: 70px; height: 70px;">
+                        <i class="fas fa-award fa-2x text-success"></i>
+                    </div>
+                    <h5 class="fw-bold mb-2">Excellence</h5>
+                    <p class="text-muted small mb-0">Committed to the highest standards of medical care</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6">
+            <div class="card border-0 shadow-sm text-center h-100 hover-lift">
+                <div class="card-body p-4">
+                    <div class="rounded-circle bg-info bg-opacity-10 d-inline-flex align-items-center justify-content-center mb-3" style="width: 70px; height: 70px;">
+                        <i class="fas fa-handshake fa-2x text-info"></i>
+                    </div>
+                    <h5 class="fw-bold mb-2">Integrity</h5>
+                    <p class="text-muted small mb-0">Upholding honesty and ethical practices always</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6">
+            <div class="card border-0 shadow-sm text-center h-100 hover-lift">
+                <div class="card-body p-4">
+                    <div class="rounded-circle bg-warning bg-opacity-10 d-inline-flex align-items-center justify-content-center mb-3" style="width: 70px; height: 70px;">
+                        <i class="fas fa-lightbulb fa-2x text-warning"></i>
+                    </div>
+                    <h5 class="fw-bold mb-2">Innovation</h5>
+                    <p class="text-muted small mb-0">Embracing new technologies and medical advances</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Departments Section -->
+    <div class="text-center mb-5">
+        <h2 class="display-5 fw-bold text-primary mb-4">Our Departments</h2>
+        <p class="text-muted fs-5 mb-5">Comprehensive medical services across specialized departments</p>
+    </div>
+
+    <div class="row g-4">
+        {% for department in departments %}
+        <div class="col-md-4 col-sm-6">
+            <div class="card border-0 shadow-sm h-100 hover-lift">
+                {% if department.department_image %}
+                <img src="{{ department.department_image.url }}" class="card-img-top" alt="{{ department.name }}" style="height: 200px; object-fit: cover;">
+                {% else %}
+                <div class="card-img-top bg-gradient d-flex align-items-center justify-content-center" style="height: 200px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                    <i class="fas fa-hospital fa-4x text-white"></i>
+                </div>
+                {% endif %}
+                <div class="card-body p-4">
+                    <h5 class="fw-bold text-primary mb-3">{{ department.name }}</h5>
+                    <p class="text-muted mb-0">{{ department.description|truncatewords:20 }}</p>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="alert alert-info text-center" role="alert">
+                <i class="fas fa-info-circle me-2"></i>
+                Department information will be updated soon.
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Statistics Section -->
+    <div class="row mt-5 py-5 bg-light rounded-3">
+        <div class="col-md-3 col-sm-6 text-center mb-4">
+            <div class="display-4 fw-bold text-primary mb-2">500+</div>
+            <p class="text-muted fs-5 mb-0">Expert Doctors</p>
+        </div>
+        <div class="col-md-3 col-sm-6 text-center mb-4">
+            <div class="display-4 fw-bold text-success mb-2">50K+</div>
+            <p class="text-muted fs-5 mb-0">Happy Patients</p>
+        </div>
+        <div class="col-md-3 col-sm-6 text-center mb-4">
+            <div class="display-4 fw-bold text-info mb-2">35+</div>
+            <p class="text-muted fs-5 mb-0">Years of Service</p>
+        </div>
+        <div class="col-md-3 col-sm-6 text-center mb-4">
+            <div class="display-4 fw-bold text-warning mb-2">24/7</div>
+            <p class="text-muted fs-5 mb-0">Emergency Care</p>
+        </div>
+    </div>
+
+    <!-- CTA Section -->
+    <div class="text-center mt-5 py-5">
+        <h2 class="display-5 fw-bold text-primary mb-4">Ready to Experience Quality Healthcare?</h2>
+        <p class="text-muted fs-5 mb-4">Join thousands of satisfied patients who trust us with their health</p>
+        <div class="d-flex gap-3 justify-content-center">
+            <a href="{% url 'book_appointment' %}" class="btn btn-primary btn-lg px-5 py-3">
+                <i class="fas fa-calendar-plus me-2"></i>Book Appointment
+            </a>
+            <a href="{% url 'contactus' %}" class="btn btn-outline-primary btn-lg px-5 py-3">
+                <i class="fas fa-phone me-2"></i>Contact Us
+            </a>
+        </div>
+    </div>
+</div>
+
+<style>
+    .hover-lift {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .hover-lift:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 15px 30px rgba(0,0,0,0.15) !important;
+    }
+    
+    .hero-section {
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .hero-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        opacity: 0.3;
+    }
+    
+    .hero-section .container {
+        position: relative;
+        z-index: 1;
+    }
+</style>
+{% endblock %}

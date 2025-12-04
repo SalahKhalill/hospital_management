@@ -1,0 +1,281 @@
+{% extends "new_base.html" %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block title %}Update User{% endblock %}
+
+{% block extra_css %}
+<style>
+    .update-user-section {
+        padding: 40px 0 80px;
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        min-height: calc(100vh - 76px);
+    }
+    
+    .page-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 20px;
+        padding: 40px;
+        margin-bottom: 30px;
+        color: white;
+        box-shadow: 0 10px 40px rgba(102, 126, 234, 0.3);
+    }
+    
+    .page-header h2 {
+        font-weight: 700;
+        margin: 0;
+    }
+    
+    .page-header p {
+        margin: 10px 0 0;
+        opacity: 0.9;
+    }
+    
+    .breadcrumb-custom {
+        background: rgba(255,255,255,0.1);
+        border-radius: 10px;
+        padding: 10px 20px;
+        display: inline-block;
+        margin-top: 15px;
+    }
+    
+    .breadcrumb-custom a {
+        color: rgba(255,255,255,0.8);
+        text-decoration: none;
+        transition: all 0.3s ease;
+    }
+    
+    .breadcrumb-custom a:hover {
+        color: white;
+    }
+    
+    .breadcrumb-custom span {
+        color: white;
+    }
+    
+    .update-card {
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        overflow: hidden;
+    }
+    
+    .card-header-custom {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        padding: 25px 30px;
+        border-bottom: 1px solid #e9ecef;
+    }
+    
+    .card-header-custom h5 {
+        margin: 0;
+        font-weight: 600;
+        color: #333;
+    }
+    
+    .card-header-custom .user-badge {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 5px 15px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
+    
+    .card-body-custom {
+        padding: 30px;
+    }
+    
+    .card-body-custom .form-control,
+    .card-body-custom .form-select {
+        border-radius: 10px;
+        padding: 12px 15px;
+        border: 2px solid #e9ecef;
+        transition: all 0.3s ease;
+    }
+    
+    .card-body-custom .form-control:focus,
+    .card-body-custom .form-select:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    
+    .card-body-custom label {
+        font-weight: 500;
+        color: #333;
+        margin-bottom: 8px;
+    }
+    
+    .btn-update {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        border-radius: 10px;
+        padding: 14px 40px;
+        font-weight: 600;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-update:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+    }
+    
+    .btn-cancel {
+        background: #6c757d;
+        border: none;
+        border-radius: 10px;
+        padding: 14px 40px;
+        font-weight: 600;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-cancel:hover {
+        background: #5a6268;
+        transform: translateY(-2px);
+    }
+    
+    .admin-icon {
+        width: 80px;
+        height: 80px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 20px;
+        box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+    }
+    
+    .admin-icon i {
+        font-size: 35px;
+        color: white;
+    }
+    
+    .info-card {
+        background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+        border-radius: 15px;
+        padding: 25px;
+        margin-top: 30px;
+        border-left: 4px solid #2196f3;
+    }
+    
+    .info-card h6 {
+        color: #1565c0;
+        font-weight: 600;
+        margin-bottom: 10px;
+    }
+    
+    .info-card p {
+        color: #1976d2;
+        margin: 0;
+        font-size: 0.9rem;
+    }
+    
+    .warning-card {
+        background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+        border-radius: 15px;
+        padding: 25px;
+        margin-top: 20px;
+        border-left: 4px solid #ff9800;
+    }
+    
+    .warning-card h6 {
+        color: #e65100;
+        font-weight: 600;
+        margin-bottom: 10px;
+    }
+    
+    .warning-card ul {
+        color: #ef6c00;
+        margin: 0;
+        padding-left: 20px;
+        font-size: 0.9rem;
+    }
+    
+    .warning-card li {
+        margin-bottom: 5px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="update-user-section">
+    <div class="container">
+        <!-- Page Header -->
+        <div class="page-header" data-aos="fade-down">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h2><i class="fas fa-user-edit me-3"></i>Update User Information</h2>
+                    <p>Modify user details and permissions</p>
+                    <div class="breadcrumb-custom">
+                        <a href="{% url 'admin_dashboard' %}"><i class="fas fa-home me-2"></i>Dashboard</a>
+                        <span class="mx-2">/</span>
+                        <span>Update User</span>
+                    </div>
+                </div>
+                <div class="col-md-4 text-end d-none d-md-block">
+                    <i class="fas fa-user-cog" style="font-size: 80px; opacity: 0.3;"></i>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-lg-8" data-aos="fade-up">
+                <div class="update-card">
+                    <div class="card-header-custom d-flex justify-content-between align-items-center">
+                        <h5><i class="fas fa-edit me-2 text-primary"></i>Edit User Details</h5>
+                        {% if hospital_user %}
+                        <span class="user-badge">
+                            <i class="fas fa-user me-1"></i>{{ hospital_user }}
+                        </span>
+                        {% endif %}
+                    </div>
+                    <div class="card-body-custom">
+                        <div class="text-center mb-4">
+                            <div class="admin-icon">
+                                <i class="fas fa-user-edit"></i>
+                            </div>
+                        </div>
+                        
+                        <form action="" method="post" enctype="multipart/form-data">
+                            {% csrf_token %}
+                            
+                            {{ form|crispy }}
+                            
+                            <div class="d-flex gap-3 mt-4">
+                                <button class="btn btn-primary btn-update" type="submit">
+                                    <i class="fas fa-save me-2"></i>Update User
+                                </button>
+                                <a href="{% url 'admin_dashboard' %}" class="btn btn-secondary btn-cancel">
+                                    <i class="fas fa-times me-2"></i>Cancel
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4" data-aos="fade-up" data-aos-delay="100">
+                <div class="info-card">
+                    <h6><i class="fas fa-info-circle me-2"></i>Update Guidelines</h6>
+                    <p>Ensure all required fields are filled correctly. Changes will take effect immediately after saving.</p>
+                </div>
+                
+              
+                
+                <div class="update-card mt-4">
+                    <div class="card-body-custom">
+                        <h6 class="mb-3"><i class="fas fa-keyboard me-2 text-primary"></i>Quick Actions</h6>
+                        <div class="d-grid gap-2">
+                            <a href="{% url 'admin_dashboard' %}" class="btn btn-outline-primary">
+                                <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

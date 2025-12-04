@@ -1,0 +1,180 @@
+{% extends "new_base.html" %}
+{% load static %}
+
+{% block title %}{{ department.name }} Department{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="position-relative" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 300px;">
+    <div class="container py-5">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb mb-3">
+                        <li class="breadcrumb-item"><a href="{% url 'home' %}" class="text-white-50 text-decoration-none">Home</a></li>
+                        <li class="breadcrumb-item"><a href="{% url 'aboutus' %}" class="text-white-50 text-decoration-none">Departments</a></li>
+                        <li class="breadcrumb-item text-white active" aria-current="page">{{ department.name }}</li>
+                    </ol>
+                </nav>
+                <h1 class="display-4 fw-bold text-white mb-3">
+                    <i class="fas fa-hospital-alt me-3"></i>{{ department.name }} Department
+                </h1>
+                <p class="lead text-white-50 mb-0">Providing excellent healthcare services</p>
+            </div>
+        </div>
+    </div>
+    <!-- Decorative wave -->
+    <div class="position-absolute bottom-0 start-0 w-100">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 100" fill="#f5f7fa">
+            <path d="M0,64L80,69.3C160,75,320,85,480,80C640,75,800,53,960,48C1120,43,1280,53,1360,58.7L1440,64L1440,100L1360,100C1280,100,1120,100,960,100C800,100,640,100,480,100C320,100,160,100,80,100L0,100Z"></path>
+        </svg>
+    </div>
+</div>
+
+<div class="container-fluid py-5" style="background: #f5f7fa;">
+    <div class="container">
+        <!-- Department Overview -->
+        <div class="row mb-5">
+            <div class="col-lg-6 mb-4 mb-lg-0">
+                <div class="card border-0 shadow-lg h-100 overflow-hidden">
+                    {% if department.department_pic %}
+                    <img src="{{ department.department_pic.url }}" alt="{{ department.name }}" class="card-img-top" style="height: 300px; object-fit: cover;">
+                    {% else %}
+                    <div class="card-img-top bg-gradient d-flex align-items-center justify-content-center" style="height: 300px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                        <i class="fas fa-hospital fa-5x text-white opacity-50"></i>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="card border-0 shadow-lg h-100">
+                    <div class="card-header bg-white py-3 border-0">
+                        <h4 class="mb-0">
+                            <i class="fas fa-info-circle text-primary me-2"></i>About This Department
+                        </h4>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted mb-0" style="line-height: 1.8;">
+                            {{ department.description }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Head of Department -->
+        {% if department.head_of_department %}
+        <div class="mb-5">
+            <h3 class="mb-4">
+                <i class="fas fa-user-tie text-primary me-2"></i>Head of Department
+            </h3>
+            <div class="card border-0 shadow-lg">
+                <div class="card-body p-4">
+                    <div class="row align-items-center">
+                        <div class="col-auto">
+                            {% if department.head_of_department.profile_pic %}
+                            <img src="{{ department.head_of_department.profile_pic.url }}" 
+                                 alt="{{ department.head_of_department.get_name }}" 
+                                 class="rounded-circle border border-4 border-primary shadow"
+                                 style="width: 120px; height: 120px; object-fit: cover;">
+                            {% else %}
+                            <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center" style="width: 120px; height: 120px;">
+                                <i class="fas fa-user-md fa-3x text-white"></i>
+                            </div>
+                            {% endif %}
+                        </div>
+                        <div class="col">
+                            <h4 class="mb-1">{{ department.head_of_department.get_name }}</h4>
+                            <p class="text-muted mb-2">
+                                <i class="fas fa-stethoscope me-2"></i>Department Head
+                            </p>
+                            {% if department.head_of_department.specialization %}
+                            <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-2">
+                                {{ department.head_of_department.specialization }}
+                            </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Department Staff -->
+        <div class="mb-5">
+            <h3 class="mb-4">
+                <i class="fas fa-users text-success me-2"></i>Department Staff
+            </h3>
+            
+            <!-- Doctors -->
+            {% if department.doctors %}
+            <div class="mb-4">
+                <h5 class="text-muted mb-3">
+                    <i class="fas fa-user-md me-2"></i>Medical Doctors
+                </h5>
+                <div class="row g-4">
+                    {% for doctor in department.doctors %}
+                    <div class="col-md-6 col-lg-4 col-xl-3">
+                        <div class="card border-0 shadow-sm h-100 text-center">
+                            <div class="card-body p-4">
+                                {% if doctor.profile_pic %}
+                                <img src="{{ doctor.profile_pic.url }}" 
+                                     alt="{{ doctor.get_name }}" 
+                                     class="rounded-circle border border-3 border-primary mb-3 shadow-sm"
+                                     style="width: 100px; height: 100px; object-fit: cover;">
+                                {% else %}
+                                <div class="rounded-circle bg-primary bg-opacity-10 d-inline-flex align-items-center justify-content-center mb-3" style="width: 100px; height: 100px;">
+                                    <i class="fas fa-user-md fa-2x text-primary"></i>
+                                </div>
+                                {% endif %}
+                                <h6 class="mb-1">{{ doctor.get_name }}</h6>
+                                <small class="text-muted">Doctor</small>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Nurses -->
+            {% if department.nurses %}
+            <div class="mt-5">
+                <h5 class="text-muted mb-3">
+                    <i class="fas fa-user-nurse me-2"></i>Nursing Staff
+                </h5>
+                <div class="row g-4">
+                    {% for nurse in department.nurses %}
+                    <div class="col-md-6 col-lg-4 col-xl-3">
+                        <div class="card border-0 shadow-sm h-100 text-center">
+                            <div class="card-body p-4">
+                                {% if nurse.profile_pic %}
+                                <img src="{{ nurse.profile_pic.url }}" 
+                                     alt="{{ nurse.get_name }}" 
+                                     class="rounded-circle border border-3 border-success mb-3 shadow-sm"
+                                     style="width: 100px; height: 100px; object-fit: cover;">
+                                {% else %}
+                                <div class="rounded-circle bg-success bg-opacity-10 d-inline-flex align-items-center justify-content-center mb-3" style="width: 100px; height: 100px;">
+                                    <i class="fas fa-user-nurse fa-2x text-success"></i>
+                                </div>
+                                {% endif %}
+                                <h6 class="mb-1">{{ nurse.get_name }}</h6>
+                                <small class="text-muted">Nurse</small>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Back Button -->
+        <div class="text-center mt-5">
+            <a href="{% url 'aboutus' %}" class="btn btn-outline-primary btn-lg px-5">
+                <i class="fas fa-arrow-left me-2"></i>Back to All Departments
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,105 @@
+{% extends "new_base.html" %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block title %}Doctor Report{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-5" style="min-height: 100vh;">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8 col-xl-6">
+                <!-- Page Header -->
+                <div class="text-center mb-4">
+                    <h1 class="display-5 fw-bold text-primary mb-2">
+                        <i class="fas fa-file-medical me-2"></i>Submit Medical Report
+                    </h1>
+                    <p class="text-muted fs-5">Complete the discharge report for your patient</p>
+                </div>
+
+                <!-- Main Card -->
+                <div class="card border-0 shadow-lg">
+                    <div class="card-header bg-gradient text-white text-center py-4" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                        <div class="mb-3">
+                            {% if request.user.doctor.profile_pic %}
+                            <img src="{{ request.user.doctor.profile_pic.url }}" 
+                                 alt="Profile" 
+                                 class="rounded-circle border border-3 border-white shadow"
+                                 width="100" height="100"
+                                 style="object-fit: cover;">
+                            {% else %}
+                            <div class="rounded-circle bg-white d-inline-flex align-items-center justify-content-center" style="width: 100px; height: 100px;">
+                                <i class="fas fa-user-md fa-3x text-primary"></i>
+                            </div>
+                            {% endif %}
+                        </div>
+                        <h4 class="mb-0">Dr. {{ request.user.get_full_name|default:request.user.username }}</h4>
+                        <small class="opacity-75">{{ request.user.doctor.department|default:"Doctor" }}</small>
+                    </div>
+                    
+                    <div class="card-body p-5">
+                        <form method="post" id="reportForm">
+                            {% csrf_token %}
+                            
+                            <div class="mb-4">
+                                <div class="alert alert-info d-flex align-items-center" role="alert">
+                                    <i class="fas fa-info-circle me-2 fa-lg"></i>
+                                    <div>
+                                        <strong>Note:</strong> Please fill in all required fields to complete the patient's discharge report.
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="report-form">
+                                {{ discharge_form|crispy }}
+                            </div>
+
+                            <div class="d-grid gap-2 mt-4">
+                                <button type="submit" class="btn btn-success btn-lg py-3">
+                                    <i class="fas fa-paper-plane me-2"></i>Submit Report
+                                </button>
+                                <a href="{% url 'doctor_appointment' %}" class="btn btn-outline-secondary">
+                                    <i class="fas fa-arrow-left me-2"></i>Back to Appointments
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Additional Info -->
+                <div class="card border-0 shadow-sm mt-4">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center">
+                            <div class="rounded-circle bg-warning bg-opacity-10 p-3 me-3">
+                                <i class="fas fa-exclamation-triangle fa-lg text-warning"></i>
+                            </div>
+                            <div>
+                                <h6 class="fw-bold mb-1">Important</h6>
+                                <p class="text-muted mb-0 small">Once submitted, the report will be sent to the administration for final discharge processing.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .report-form label {
+        color: #333;
+        font-weight: 600;
+    }
+    .report-form .form-control {
+        border-radius: 10px;
+        padding: 12px 15px;
+    }
+    .report-form .form-control:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+    }
+    .report-form textarea {
+        min-height: 120px;
+    }
+</style>
+{% endblock %}

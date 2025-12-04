@@ -1,0 +1,268 @@
+{% extends "new_base.html" %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block title %}My Appointments{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-5" style="min-height: 100vh;">
+    <div class="container">
+        <!-- Page Header -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <h1 class="display-5 fw-bold text-primary mb-2">
+                    <i class="fas fa-calendar-alt me-2"></i>My Appointments
+                </h1>
+                <p class="text-muted fs-5">View and manage your medical appointments</p>
+            </div>
+            <div class="col-md-6 d-flex align-items-center justify-content-end">
+                <a href="{% url 'book_appointment' %}" class="btn btn-primary btn-lg">
+                    <i class="fas fa-plus-circle me-2"></i>Book New Appointment
+                </a>
+            </div>
+        </div>
+
+        <!-- Statistics Cards -->
+        <div class="row g-4 mb-4">
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <div class="rounded-circle bg-success bg-opacity-10 d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                            <i class="fas fa-check-circle fa-2x text-success"></i>
+                        </div>
+                        <h3 class="fw-bold text-success mb-1" id="confirmed-count">0</h3>
+                        <p class="text-muted mb-0">Confirmed</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <div class="rounded-circle bg-warning bg-opacity-10 d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                            <i class="fas fa-clock fa-2x text-warning"></i>
+                        </div>
+                        <h3 class="fw-bold text-warning mb-1" id="pending-count">0</h3>
+                        <p class="text-muted mb-0">Pending</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <div class="rounded-circle bg-info bg-opacity-10 d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                            <i class="fas fa-calendar-check fa-2x text-info"></i>
+                        </div>
+                        <h3 class="fw-bold text-info mb-1">{{ appointments.qs.count }}</h3>
+                        <p class="text-muted mb-0">Total</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search and Filter Card -->
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-body p-4">
+                <form method="get" class="row g-3 align-items-end">
+                    <div class="col-md-10">
+                        {{ appointments.form.as_p }}
+                    </div>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fas fa-search me-2"></i>Search
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Appointments Table -->
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-gradient text-white py-3" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                <h5 class="mb-0">
+                    <i class="fas fa-list me-2"></i>Appointment History
+                </h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="px-4 py-3">Doctor</th>
+                                <th class="py-3">Department</th>
+                                <th class="py-3">Date</th>
+                                <th class="py-3">Time</th>
+                                <th class="py-3">Status</th>
+                                <th class="py-3 text-center">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for appointment in appointments.qs %}
+                            <tr>
+                                <td class="px-4 py-3">
+                                    <div class="d-flex align-items-center">
+                                        <div class="rounded-circle bg-primary bg-opacity-10 p-2 me-3">
+                                            <i class="fas fa-user-md text-primary"></i>
+                                        </div>
+                                        <span class="fw-semibold">Dr. {{ appointment.doctor.get_name }}</span>
+                                    </div>
+                                </td>
+                                <td class="py-3">
+                                    <span class="badge bg-info text-dark">{{ appointment.department.name }}</span>
+                                </td>
+                                <td class="py-3">
+                                    <i class="fas fa-calendar me-1 text-muted"></i>
+                                    {{ appointment.appointment_date|date:"M d, Y" }}
+                                </td>
+                                <td class="py-3">
+                                    <i class="fas fa-clock me-1 text-muted"></i>
+                                    {{ appointment.appointment_time }}
+                                </td>
+                                <td class="py-3">
+                                    {% if appointment.status %}
+                                        <span class="badge bg-success">
+                                            <i class="fas fa-check-circle me-1"></i>Confirmed
+                                        </span>
+                                    {% else %}
+                                        <span class="badge bg-warning text-dark">
+                                            <i class="fas fa-clock me-1"></i>Pending
+                                        </span>
+                                    {% endif %}
+                                </td>
+                                <td class="py-3 text-center">
+                                    <div class="btn-group" role="group">
+                                        {% if appointment.is_done %}
+                                            <a href="{% url 'final_discharge' id=appointment.id %}" 
+                                               class="btn btn-sm btn-success" 
+                                               title="Discharge">
+                                                <i class="fas fa-check-double"></i>
+                                            </a>
+                                        {% else %}
+                                            <a href="{% url 'patient_update_appointment' id=appointment.id %}" 
+                                               class="btn btn-sm btn-outline-primary" 
+                                               title="Edit">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                        {% endif %}
+                                        <a href="{% url 'patient_delete_appointment' id=appointment.id %}" 
+                                           class="btn btn-sm btn-outline-danger" 
+                                           title="Delete"
+                                           onclick="return confirm('Are you sure you want to cancel this appointment?');">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="6" class="text-center py-5">
+                                    <i class="fas fa-calendar-times fa-3x text-muted mb-3 d-block"></i>
+                                    <h5 class="text-muted mb-3">No Appointments Found</h5>
+                                    <p class="text-muted mb-3">You don't have any appointments scheduled yet.</p>
+                                    <a href="{% url 'book_appointment' %}" class="btn btn-primary">
+                                        <i class="fas fa-plus-circle me-2"></i>Book Your First Appointment
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Information Cards -->
+        <div class="row mt-4">
+            <div class="col-md-4 mb-3">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body text-center p-4">
+                        <div class="rounded-circle bg-primary bg-opacity-10 d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                            <i class="fas fa-bell fa-2x text-primary"></i>
+                        </div>
+                        <h6 class="fw-bold mb-2">Appointment Reminders</h6>
+                        <p class="text-muted small mb-0">You'll receive notifications before your scheduled appointments</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body text-center p-4">
+                        <div class="rounded-circle bg-success bg-opacity-10 d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                            <i class="fas fa-user-md fa-2x text-success"></i>
+                        </div>
+                        <h6 class="fw-bold mb-2">Expert Care</h6>
+                        <p class="text-muted small mb-0">Consult with experienced healthcare professionals</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body text-center p-4">
+                        <div class="rounded-circle bg-info bg-opacity-10 d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                            <i class="fas fa-clock fa-2x text-info"></i>
+                        </div>
+                        <h6 class="fw-bold mb-2">Flexible Scheduling</h6>
+                        <p class="text-muted small mb-0">Modify or cancel appointments up to 24 hours in advance</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Back Button -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <a href="{% url 'patient_dashboard' %}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Custom styling for search form */
+    form p {
+        margin-bottom: 0;
+    }
+    
+    form input,
+    form select {
+        width: 100%;
+        padding: 10px;
+        border: 2px solid #e2e8f0;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+    
+    form input:focus,
+    form select:focus {
+        border-color: #667eea;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    
+    form label {
+        font-weight: 600;
+        color: #2d3748;
+        margin-bottom: 0.5rem;
+    }
+    
+    .table-hover tbody tr:hover {
+        background-color: rgba(102, 126, 234, 0.05);
+    }
+    
+    .btn-group .btn {
+        margin: 0 2px;
+    }
+</style>
+
+<script>
+    // Count confirmed and pending appointments from the table
+    document.addEventListener('DOMContentLoaded', function() {
+        var confirmedBadges = document.querySelectorAll('.badge.bg-success');
+        var pendingBadges = document.querySelectorAll('.badge.bg-warning');
+        
+        document.getElementById('confirmed-count').textContent = confirmedBadges.length;
+        document.getElementById('pending-count').textContent = pendingBadges.length;
+    });
+</script>
+{% endblock %}
