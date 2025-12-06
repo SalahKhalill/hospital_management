@@ -1,0 +1,8 @@
+xray.h5 model:
+https://drive.google.com/file/d/1ZAZSKeiXr62N632oLb418pisvnOghbPo/view?usp=sharing
+
+skin.h5 model:
+https://drive.google.com/file/d/1h4UUQm11AmdTf_LOIPSzhmlo5d4SpIBL/view?usp=sharing
+
+brain.h5 model:
+https://drive.google.com/file/d/1bl-fxmB5NbGoF_Ij4BjfHOQxjmsq76GT/view?usp=sharing
