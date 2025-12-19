@@ -1,0 +1,17 @@
+{
+  "model_name": "brain_tumor_detection_vgg16",
+  "final_val_accuracy": 0.800000011920929,
+  "final_train_accuracy": 0.7253885865211487,
+  "test_accuracy": 0.8,
+  "epochs_trained": 11,
+  "architecture": "VGG16 Transfer Learning",
+  "input_size": [
+    224,
+    224,
+    3
+  ],
+  "classes": {
+    "0": "NO",
+    "1": "YES"
+  }
+}

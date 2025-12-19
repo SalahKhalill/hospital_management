@@ -82,6 +82,43 @@
                                 </div>
                             </div>
 
+                            <!-- Advanced Options -->
+                            <div class="mb-4 p-3 bg-light rounded-3">
+                                <h6 class="fw-bold mb-3"><i class="fas fa-sliders-h text-warning me-2"></i>Analysis Options</h6>
+                                <div class="row g-3">
+                                    <div class="col-md-4">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="generate_heatmap" name="generate_heatmap">
+                                            <label class="form-check-label" for="generate_heatmap">
+                                                <i class="fas fa-fire text-warning me-1"></i>
+                                                AI Focus Heatmap
+                                                <span class="text-muted small d-block">Shows fracture location regions</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="use_tta" name="use_tta">
+                                            <label class="form-check-label" for="use_tta">
+                                                <i class="fas fa-sync-alt text-primary me-1"></i>
+                                                Enhanced Analysis (TTA)
+                                                <span class="text-muted small d-block">Multiple augmentation for accuracy</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="assess_quality" name="assess_quality" checked>
+                                            <label class="form-check-label" for="assess_quality">
+                                                <i class="fas fa-search-plus text-success me-1"></i>
+                                                Quality Assessment
+                                                <span class="text-muted small d-block">Evaluate X-ray quality</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
                             <div class="d-grid">
                                 <button type="submit" class="btn btn-warning btn-lg rounded-pill" id="analyzeBtn" disabled>
                                     <i class="fas fa-x-ray me-2"></i>Analyze X-ray
@@ -97,69 +134,215 @@
                 <div class="card card-modern border-0 shadow-lg mb-4" data-aos="fade-up">
                     <div class="card-header bg-transparent border-0 pt-4 pb-0 px-4">
                         <div class="d-flex align-items-center">
-                            <div class="rounded-circle bg-success bg-opacity-10 p-3 me-3">
-                                <i class="fas fa-chart-line fa-lg text-success"></i>
+                            <div class="rounded-circle bg-{{ severity_color }} bg-opacity-10 p-3 me-3">
+                                <i class="fas fa-chart-line fa-lg text-{{ severity_color }}"></i>
                             </div>
                             <div>
                                 <h4 class="fw-bold mb-1">Analysis Results</h4>
                                 <p class="text-muted mb-0 small">AI-powered diagnostic assessment</p>
                             </div>
+                            {% if not is_confident %}
+                            <span class="badge bg-warning text-dark ms-auto">
+                                <i class="fas fa-exclamation-triangle me-1"></i>Low Confidence
+                            </span>
+                            {% endif %}
                         </div>
                     </div>
                     <div class="card-body p-4 p-md-5">
                         <div class="row g-4">
                             <!-- Image Display -->
                             <div class="col-lg-5">
-                                <div class="position-relative">
+                                <div class="position-relative mb-3">
                                     <div class="badge bg-warning position-absolute top-0 start-0 m-3 z-1">
                                         <i class="fas fa-check me-1"></i>Analyzed
                                     </div>
                                     <img src="data:image/png;base64,{{ img }}" alt="Analyzed X-ray" class="img-fluid rounded-3 shadow">
                                 </div>
+                                {% if heatmap %}
+                                <div class="position-relative">
+                                    <div class="badge bg-info position-absolute top-0 start-0 m-3 z-1">
+                                        <i class="fas fa-fire me-1"></i>AI Focus Map
+                                    </div>
+                                    <img src="data:image/jpeg;base64,{{ heatmap }}" alt="Grad-CAM Heatmap" class="img-fluid rounded-3 shadow">
+                                    <p class="text-muted small mt-2 text-center">
+                                        <i class="fas fa-info-circle me-1"></i>Heatmap shows regions the AI focused on
+                                    </p>
+                                </div>
+                                {% endif %}
                             </div>
 
                             <!-- Results Display -->
                             <div class="col-lg-7">
-                                {% if result == "Fractured" %}
-                                <div class="result-card p-4 rounded-3 mb-4 bg-danger bg-opacity-10">
+                                <!-- Main Result -->
+                                <div class="result-card p-4 rounded-3 mb-4 bg-{{ severity_color }} bg-opacity-10 border-start border-4 border-{{ severity_color }}">
                                     <div class="d-flex align-items-center mb-3">
-                                        <div class="rounded-circle bg-danger bg-opacity-25 p-3 me-3">
-                                            <i class="fas fa-exclamation-circle text-danger fa-2x"></i>
+                                        <div class="rounded-circle bg-{{ severity_color }} bg-opacity-25 p-3 me-3">
+                                            <i class="fas {% if severity == 'normal' %}fa-check-circle{% else %}fa-exclamation-circle{% endif %} text-{{ severity_color }} fa-2x"></i>
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <p class="text-muted small mb-1">Detected Condition</p>
+                                            <h3 class="fw-bold mb-0 text-{{ severity_color }}">{{ result }}</h3>
+                                            {% if description %}
+                                            <p class="text-muted small mt-1 mb-0">{{ description }}</p>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                                        <div>
+                                            <span class="text-muted small">Confidence:</span>
+                                            <span class="fw-bold ms-1">{{ confidence }}</span>
                                         </div>
                                         <div>
-                                            <p class="text-muted small mb-1">Detected Condition</p>
-                                            <h3 class="fw-bold mb-0 text-danger">Fracture Detected</h3>
+                                            <span class="badge bg-{{ severity_color }} text-uppercase me-1">{{ severity }} Severity</span>
+                                            {% if urgency %}
+                                            <span class="badge bg-dark text-uppercase">{{ urgency }}</span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <!-- Confidence Bar -->
+                                    <div class="progress mt-3" style="height: 8px;">
+                                        <div class="progress-bar bg-{{ severity_color }}" role="progressbar" 
+                                             style="width: {{ confidence }}" 
+                                             aria-valuenow="{{ confidence_value|floatformat:0 }}" aria-valuemin="0" aria-valuemax="100">
                                         </div>
                                     </div>
                                 </div>
-                                {% else %}
-                                <div class="result-card p-4 rounded-3 mb-4 bg-success bg-opacity-10">
-                                    <div class="d-flex align-items-center mb-3">
-                                        <div class="rounded-circle bg-success bg-opacity-25 p-3 me-3">
-                                            <i class="fas fa-check-circle text-success fa-2x"></i>
+
+                                <!-- Quality Assessment -->
+                                {% if quality_assessment %}
+                                <div class="card border-0 bg-light mb-4">
+                                    <div class="card-body">
+                                        <div class="d-flex align-items-center justify-content-between mb-3">
+                                            <h6 class="fw-bold mb-0">
+                                                <i class="fas fa-check-circle text-success me-2"></i>X-ray Quality Assessment
+                                            </h6>
+                                            <span class="badge {% if quality_assessment.is_acceptable %}bg-success{% else %}bg-warning{% endif %}">
+                                                {{ quality_assessment.overall_quality }}
+                                            </span>
                                         </div>
-                                        <div>
-                                            <p class="text-muted small mb-1">Detected Condition</p>
-                                            <h3 class="fw-bold mb-0 text-success">No Fracture Detected</h3>
+                                        <div class="row g-2">
+                                            <div class="col-6 col-md-3">
+                                                <div class="text-center p-2 rounded bg-white">
+                                                    <div class="small text-muted mb-1">Brightness</div>
+                                                    <div class="fw-bold">{{ quality_assessment.brightness_score }}</div>
+                                                </div>
+                                            </div>
+                                            <div class="col-6 col-md-3">
+                                                <div class="text-center p-2 rounded bg-white">
+                                                    <div class="small text-muted mb-1">Contrast</div>
+                                                    <div class="fw-bold">{{ quality_assessment.contrast_score }}</div>
+                                                </div>
+                                            </div>
+                                            <div class="col-6 col-md-3">
+                                                <div class="text-center p-2 rounded bg-white">
+                                                    <div class="small text-muted mb-1">Sharpness</div>
+                                                    <div class="fw-bold">{{ quality_assessment.sharpness_score }}</div>
+                                                </div>
+                                            </div>
+                                            <div class="col-6 col-md-3">
+                                                <div class="text-center p-2 rounded bg-white">
+                                                    <div class="small text-muted mb-1">Noise Level</div>
+                                                    <div class="fw-bold">{{ quality_assessment.noise_score }}</div>
+                                                </div>
+                                            </div>
                                         </div>
+                                        {% if quality_assessment.issues %}
+                                        <div class="mt-2">
+                                            {% for issue in quality_assessment.issues %}
+                                            <span class="badge bg-warning text-dark me-1"><i class="fas fa-exclamation-triangle me-1"></i>{{ issue }}</span>
+                                            {% endfor %}
+                                        </div>
+                                        {% endif %}
                                     </div>
                                 </div>
                                 {% endif %}
 
+                                <!-- Top Predictions -->
+                                {% if top_predictions %}
                                 <div class="card border-0 bg-light mb-4">
                                     <div class="card-body">
                                         <h6 class="fw-bold mb-3">
-                                            <i class="fas fa-lightbulb text-warning me-2"></i>About This Diagnosis
+                                            <i class="fas fa-list-ol text-warning me-2"></i>Top Predictions
                                         </h6>
-                                        <p class="mb-0 text-muted">
-                                            {% if result == "Fractured" %}
-                                            A bone fracture has been detected in the X-ray image. This indicates a break or crack in the bone structure. 
-                                            Immediate medical attention is recommended for proper treatment and healing.
-                                            {% else %}
-                                            No signs of fracture were detected in the X-ray image. The bone structure appears intact. 
-                                            However, if you're experiencing pain or discomfort, please consult an orthopedic specialist.
+                                        {% for pred in top_predictions %}
+                                        <div class="mb-3 pb-2 {% if not forloop.last %}border-bottom{% endif %}">
+                                            <div class="d-flex align-items-center justify-content-between mb-1">
+                                                <span class="{% if forloop.first %}fw-bold{% else %}text-muted{% endif %}">
+                                                    {% if forloop.first %}<i class="fas fa-trophy text-warning me-2"></i>{% endif %}
+                                                    {{ pred.class }}
+                                                    {% if pred.severity %}
+                                                    <span class="badge bg-secondary ms-1 small">{{ pred.severity }}</span>
+                                                    {% endif %}
+                                                </span>
+                                                <div class="d-flex align-items-center">
+                                                    <div class="progress me-2" style="width: 100px; height: 6px;">
+                                                        <div class="progress-bar {% if forloop.first %}bg-warning{% else %}bg-secondary{% endif %}" 
+                                                             style="width: {{ pred.probability }}"></div>
+                                                    </div>
+                                                    <span class="badge {% if forloop.first %}bg-warning{% else %}bg-secondary{% endif %}">{{ pred.probability }}</span>
+                                                </div>
+                                            </div>
+                                            {% if pred.description and forloop.counter <= 2 %}
+                                            <p class="text-muted small mb-0 ms-4">{{ pred.description|truncatewords:20 }}</p>
                                             {% endif %}
-                                        </p>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                {% endif %}
+
+                                <!-- Recommendations -->
+                                {% if recommendations %}
+                                <div class="card border-0 bg-light mb-4">
+                                    <div class="card-body">
+                                        <h6 class="fw-bold mb-3">
+                                            <i class="fas fa-clipboard-list text-success me-2"></i>Recommendations
+                                        </h6>
+                                        <ul class="list-unstyled mb-0">
+                                            {% for rec in recommendations %}
+                                            <li class="d-flex align-items-start mb-2">
+                                                <i class="fas fa-chevron-right text-{{ severity_color }} me-2 mt-1 small"></i>
+                                                <span>{{ rec }}</span>
+                                            </li>
+                                            {% endfor %}
+                                        </ul>
+                                    </div>
+                                </div>
+                                {% endif %}
+
+                                <!-- Preprocessing Info -->
+                                {% if preprocessing_applied %}
+                                <div class="mb-4">
+                                    <span class="text-muted small">
+                                        <i class="fas fa-magic me-1"></i>Image enhancements applied:
+                                        {% for p in preprocessing_applied %}
+                                        <span class="badge bg-light text-dark border ms-1">{{ p }}</span>
+                                        {% endfor %}
+                                    </span>
+                                </div>
+                                {% endif %}
+
+                                <!-- Performance Metrics -->
+                                <div class="mb-4 p-3 bg-light rounded-3">
+                                    <div class="row g-2 text-center">
+                                        {% if inference_time %}
+                                        <div class="col-4">
+                                            <div class="small text-muted">Inference Time</div>
+                                            <div class="fw-bold"><i class="fas fa-clock text-warning me-1"></i>{{ inference_time }}ms</div>
+                                        </div>
+                                        {% endif %}
+                                        {% if original_size %}
+                                        <div class="col-4">
+                                            <div class="small text-muted">Image Size</div>
+                                            <div class="fw-bold"><i class="fas fa-expand text-info me-1"></i>{{ original_size }}</div>
+                                        </div>
+                                        {% endif %}
+                                        {% if used_tta %}
+                                        <div class="col-4">
+                                            <div class="small text-muted">Analysis Mode</div>
+                                            <div class="fw-bold"><i class="fas fa-sync-alt text-success me-1"></i>TTA Enhanced</div>
+                                        </div>
+                                        {% endif %}
                                     </div>
                                 </div>
 
