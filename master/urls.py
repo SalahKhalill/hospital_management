@@ -76,6 +76,10 @@ urlpatterns = [
     path('skin_detect/', views.skin_detect_view, name='skin_detect'),
     path('bones_classifier/', views.bones_detect_view, name='bones_classifier'),
     path('brain_classifier/', views.brain_detect_view, name='brain_classifier'),
+    
+    # AI API endpoints
+    path('api/ai/classify/', views.ai_classify_api, name='ai_classify_api'),
+    path('api/ai/models/status/', views.ai_models_status_api, name='ai_models_status'),
 
 ]
 

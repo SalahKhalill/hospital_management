@@ -2,33 +2,130 @@ import numpy as np
 import matplotlib.pyplot as plt
 import cv2
 import tensorflow as tf
+from tensorflow.keras.applications.vgg16 import preprocess_input
 from sklearn.model_selection import train_test_split
 from django.conf import settings
 import os
-# import pickle 
+
+try:
+    import imutils
+except ImportError:
+    imutils = None
+    print("Warning: imutils not installed. Brain cropping may not work optimally.")
 
 
 def load_trained_model(model_dir):
-  model = tf.keras.models.load_model(model_dir)
-  input_shape = list(model.layers[0].input_shape)
-  print('input_shape',input_shape)
-  return model,input_shape[1:-1]#, output_len[1:-1]
+    """
+    Load the trained brain tumor classification model
+    Returns: model and input shape
+    """
+    model = tf.keras.models.load_model(model_dir)
+    input_shape = list(model.layers[0].input_shape)
+    print('Brain Tumor Model loaded - Input shape:', input_shape)
+    return model, input_shape[1:-1]
 
-def classifier(path,model,shape)-> int:
-    img=cv2.imread(path)
-    img=cv2.resize(img,dsize=shape)
-    img_rgb=cv2.cvtColor(img,cv2.COLOR_BGR2RGB)
-    img=np.expand_dims(img,axis=0)
-    pred=model.predict(img,verbose=0)
-    idx=np.argmax(pred)
-    print('model output: ',pred)
-    # plt.imshow(img_rgb) - Removed to prevent blocking in web server
+
+def crop_brain_contour(img, add_pixels_value=0):
+    """
+    Crop brain from MRI scan by finding the largest contour
+    Args:
+        img: Input image (BGR format)
+        add_pixels_value: Padding pixels around the detected brain region
+    Returns:
+        Cropped brain image
+    """
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    gray = cv2.GaussianBlur(gray, (5, 5), 0)
+
+    # Threshold the image
+    thresh = cv2.threshold(gray, 45, 255, cv2.THRESH_BINARY)[1]
+    thresh = cv2.erode(thresh, None, iterations=2)
+    thresh = cv2.dilate(thresh, None, iterations=2)
+
+    # Find contours
+    cnts = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     
-    return idx,pred
+    if imutils:
+        cnts = imutils.grab_contours(cnts)
+    else:
+        cnts = cnts[0] if len(cnts) == 2 else cnts[1]
+    
+    if len(cnts) == 0:
+        return img
+    
+    c = max(cnts, key=cv2.contourArea)
+
+    # Find extreme points
+    extLeft = tuple(c[c[:, :, 0].argmin()][0])
+    extRight = tuple(c[c[:, :, 0].argmax()][0])
+    extTop = tuple(c[c[:, :, 1].argmin()][0])
+    extBot = tuple(c[c[:, :, 1].argmax()][0])
+
+    ADD_PIXELS = add_pixels_value
+    new_img = img[extTop[1]-ADD_PIXELS:extBot[1]+ADD_PIXELS, 
+                  extLeft[0]-ADD_PIXELS:extRight[0]+ADD_PIXELS].copy()
+    
+    return new_img if new_img.size > 0 else img
+
+
+def classifier(path, model, shape) -> tuple:
+    """
+    Classify brain MRI image for tumor detection using VGG-16 preprocessing
+    Args:
+        path: Path to the MRI image
+        model: Loaded TensorFlow model
+        shape: Input shape for the model (height, width)
+    Returns:
+        idx: Class index (0=No Tumor, 1=Tumor)
+        pred: Raw prediction probabilities
+    """
+    # Read image
+    img = cv2.imread(path)
+    if img is None:
+        raise ValueError(f"Could not read image from path: {path}")
+    
+    # Resize to expected input shape first
+    img = cv2.resize(img, dsize=shape, interpolation=cv2.INTER_CUBIC)
+    
+    # Crop brain region (same preprocessing as training)
+    img_cropped = crop_brain_contour(img)
+    
+    # Resize cropped image to model input size
+    img_resized = cv2.resize(img_cropped, dsize=shape, interpolation=cv2.INTER_CUBIC)
+    
+    # Apply VGG-16 preprocessing (same as training)
+    img_preprocessed = preprocess_input(img_resized)
+    img_batch = np.expand_dims(img_preprocessed, axis=0)
+    
+    # Make prediction
+    pred = model.predict(img_batch, verbose=0)
+    
+    # For binary classification, convert probability to class index
+    # pred is shape (1, 1) with probability of tumor class
+    prob_tumor = pred[0][0]
+    idx = 1 if prob_tumor > 0.5 else 0
+    
+    # Create probability array for both classes
+    pred_probs = np.array([[1 - prob_tumor, prob_tumor]])
+    
+    print(f'Brain Tumor Prediction - No Tumor: {(1-prob_tumor)*100:.2f}%, Tumor: {prob_tumor*100:.2f}%')
+    
+    return idx, pred_probs
+
 
 # Load model with proper path
 model_path = os.path.join(settings.BASE_DIR, 'models', 'brain.h5')
-model,input_layer=load_trained_model(model_path)
 
-# Test code removed - will be called from views when needed
-classes=['No tumor', 'Stable tumor', 'Unstable tumor']
+# Check if model exists
+if os.path.exists(model_path):
+    model, input_layer = load_trained_model(model_path)
+    print("Brain Tumor Classification Model (VGG-16) loaded successfully!")
+    print(f"Model accuracy: ~80% (Validation & Test)")
+else:
+    model = None
+    input_layer = (224, 224)  # VGG-16 input size
+    print(f"WARNING: Brain model not found at {model_path}")
+    print("Please train the model using brain-tumor-detection-v1-0-cnn-vgg-16.ipynb")
+
+# Binary classification: No Tumor vs Tumor
+classes = ['No Tumor', 'Tumor']

@@ -140,3 +140,10 @@ models/*.h5
 
 # Log files
 logs/
+*.log
+
+# Environment files
+.env
+.env.local
+.env.production
+brain-tumor-detection-v1-0-cnn-vgg-16.ipynb

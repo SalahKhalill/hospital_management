@@ -14,10 +14,19 @@ from django.template.loader import get_template
 from.forms import *
 from .filters import *
 from django.core.mail import send_mail
-from . import bones_classifier,brain_classifier,skin_classifier
+from .ai_classifier import (
+    classify_image, ClassifierType, ClassificationResult,
+    ModelNotFoundError, ClassificationError, ImageValidationError, ImageQualityError,
+    check_models_status, get_classifier_info, Severity, ImageQuality,
+    get_all_conditions, get_model_info
+)
 from PIL import Image
 import io
 import base64
+import tempfile
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 
@@ -868,131 +877,387 @@ def send_mail_view(request, id):
 #------------------------ AI RELATED VIEWS START ------------------------------
 #---------------------------------------------------------------------------------
 
-#ai model 
+def _get_severity_color(severity: Severity) -> str:
+    """Get Bootstrap color class for severity level."""
+    colors = {
+        Severity.NORMAL: 'success',
+        Severity.LOW: 'info',
+        Severity.MODERATE: 'warning',
+        Severity.HIGH: 'danger',
+        Severity.CRITICAL: 'danger',
+    }
+    return colors.get(severity, 'secondary')
 
-def skin_detect_view(request):
+
+def _process_ai_classification(request, classifier_type: ClassifierType, template_name: str):
+    """
+    Advanced AI classification handler with comprehensive results.
+    
+    Features:
+    - Image preprocessing and enhancement
+    - Image quality assessment
+    - Test-time augmentation for robust predictions
+    - Confidence scores with thresholds
+    - Severity assessment
+    - Top-N predictions with detailed information
+    - Medical recommendations
+    - Grad-CAM heatmap visualization
+    - Performance metrics
+    
+    Args:
+        request: Django HTTP request
+        classifier_type: Type of classifier to use
+        template_name: Template to render results
+        
+    Returns:
+        Rendered template with classification results or error
+    """
+    classifier_info = get_classifier_info(classifier_type)
+    model_info = get_model_info(classifier_type)
+    all_conditions = get_all_conditions(classifier_type)
+    
+    context = {
+        'classifier_info': classifier_info,
+        'model_info': model_info,
+        'all_conditions': all_conditions,
+    }
+    
     if request.method == 'POST' and request.FILES.get('image'):
+        image_path = None
         try:
+            # Load uploaded image
             image = request.FILES['image']
             img = Image.open(io.BytesIO(image.read()))
-
-            # Create temporary file with proper path
-            import tempfile
+            
+            # Store original size for display
+            original_size = img.size
+            
+            # Validate image format
+            if img.mode not in ('RGB', 'L', 'RGBA'):
+                img = img.convert('RGB')
+            
+            # Create temporary file for processing
             with tempfile.NamedTemporaryFile(delete=False, suffix='.png') as tmp_file:
                 image_path = tmp_file.name
                 img.save(image_path, format='PNG')
             
-            # Use the already loaded model from skin_classifier module
-            idx, pred = skin_classifier.classifier(image_path, skin_classifier.model, skin_classifier.input_layer)
+            # Get user options from form
+            generate_heatmap = request.POST.get('generate_heatmap') == 'on'
+            use_tta = request.POST.get('use_tta') == 'on'
+            assess_quality = request.POST.get('assess_quality', 'on') == 'on'
             
-            # تحديد الفئة الناتجة عن التصنيف
-            classes =['actinic keratosis', 'basal cell carcinoma', 'dermatofibroma', 'melanoma', 'nevus', 'pigmented benign keratosis \n ', 'seborrheic keratosis', 'squamous cell carcinoma', 'vascular lesion']
-            # Convert idx to Python int
-            result = classes[int(idx)]
+            # Perform advanced classification with all features
+            result = classify_image(
+                image_path, 
+                classifier_type,
+                generate_heatmap=generate_heatmap,
+                top_n=5,
+                use_tta=use_tta,
+                assess_quality=assess_quality
+            )
             
-            # تحويل الصورة إلى base64
+            # Convert original image to base64 for display
             img = Image.open(image_path)
             buffer = io.BytesIO()
-            img.save(buffer, format='JPEG')
+            img.save(buffer, format='JPEG', quality=90)
             img_str = base64.b64encode(buffer.getvalue()).decode('utf-8')
-
-            # Clean up temporary file
-            import os
-            try:
-                os.remove(image_path)
-            except:
-                pass
-
-            return render(request, 'ai_classifier/new_skin_classifier.html', {'result': result, 'img': img_str})
+            
+            # Build comprehensive context with all results
+            context.update({
+                'result': result.class_name,
+                'confidence': f"{result.confidence * 100:.1f}%",
+                'confidence_value': result.confidence,
+                'is_confident': result.is_confident,
+                'severity': result.severity.value,
+                'severity_color': _get_severity_color(result.severity),
+                'urgency': result.urgency_level,
+                'description': result.medical_info.get('description', ''),
+                'top_predictions': [
+                    {
+                        'class': pred.class_name,
+                        'probability': f"{pred.probability * 100:.1f}%",
+                        'probability_value': pred.probability,
+                        'description': pred.description,
+                        'severity': pred.severity.value if pred.severity else None,
+                    }
+                    for pred in result.top_predictions
+                ],
+                'recommendations': result.recommendations,
+                'preprocessing_applied': result.preprocessing_applied,
+                'img': img_str,
+                'original_size': f"{original_size[0]}x{original_size[1]}",
+                'heatmap': result.heatmap_base64,
+                'show_results': True,
+                'inference_time': f"{result.inference_time_ms:.0f}",
+                'used_tta': use_tta,
+                'image_hash': result.image_hash[:12] if result.image_hash else None,
+            })
+            
+            # Add quality assessment if available
+            if result.quality_assessment:
+                qa = result.quality_assessment
+                # Calculate overall quality score from component scores
+                avg_quality = (qa.brightness_score + qa.contrast_score + qa.sharpness_score + qa.noise_score) / 4
+                context.update({
+                    'quality_assessment': {
+                        'overall_quality': qa.overall_quality.value,
+                        'quality_score': f"{avg_quality * 100:.0f}%",
+                        'brightness_score': f"{qa.brightness_score * 100:.0f}%",
+                        'contrast_score': f"{qa.contrast_score * 100:.0f}%",
+                        'sharpness_score': f"{qa.sharpness_score * 100:.0f}%",
+                        'noise_score': f"{qa.noise_score * 100:.0f}%",
+                        'is_acceptable': qa.is_usable,
+                        'issues': qa.issues,
+                    }
+                })
+            
+        except ModelNotFoundError as e:
+            logger.error(f"Model not found for {classifier_type.value}: {str(e)}")
+            context['error'] = (
+                f"AI model not available. Please ensure the {classifier_type.value}.h5 "
+                "model file is downloaded and placed in the 'models' folder."
+            )
+            
+        except ImageQualityError as e:
+            logger.warning(f"Image quality issue for {classifier_type.value}: {str(e)}")
+            context['error'] = f"Image quality issue: {str(e)}. Please upload a clearer image."
+            
+        except ImageValidationError as e:
+            logger.warning(f"Image validation failed for {classifier_type.value}: {str(e)}")
+            context['error'] = f"Image validation failed: {str(e)}"
+            
+        except ClassificationError as e:
+            logger.error(f"Classification failed for {classifier_type.value}: {str(e)}")
+            context['error'] = f"Failed to analyze image: {str(e)}"
+            
         except Exception as e:
-            import traceback
-            print(f"Error in skin_detect_view: {str(e)}")
-            print(traceback.format_exc())
-            return render(request, 'ai_classifier/new_skin_classifier.html', {'error': str(e)})
-    return render(request, 'ai_classifier/new_skin_classifier.html')
+            logger.exception(f"Unexpected error in {classifier_type.value} classification")
+            context['error'] = "An unexpected error occurred. Please try again with a different image."
+            
+        finally:
+            # Clean up temporary file
+            if image_path:
+                try:
+                    os.remove(image_path)
+                except OSError:
+                    pass
+    
+    return render(request, template_name, context)
 
+
+def skin_detect_view(request):
+    """Detect skin conditions from uploaded image."""
+    return _process_ai_classification(
+        request, 
+        ClassifierType.SKIN, 
+        'ai_classifier/new_skin_classifier.html'
+    )
 
 
 def bones_detect_view(request):
-    if request.method == 'POST' and request.FILES.get('image'):
-        try:
-            image = request.FILES['image']
-            img = Image.open(io.BytesIO(image.read()))
-
-            # Create temporary file with proper path
-            import tempfile
-            with tempfile.NamedTemporaryFile(delete=False, suffix='.png') as tmp_file:
-                image_path = tmp_file.name
-                img.save(image_path, format='PNG')
-            
-            # Use the already loaded model from bones_classifier module
-            idx, pred = bones_classifier.classifier(image_path, bones_classifier.model, bones_classifier.input_layer)
-            
-            # تحديد الفئة الناتجة عن التصنيف
-            classes=['No fracture', 'fractured']
-            # idx is already the predicted class index - convert to Python int
-            result = classes[int(idx)]
-            
-            # تحويل الصورة إلى base64
-            img = Image.open(image_path)
-            buffer = io.BytesIO()
-            img.save(buffer, format='JPEG')
-            img_str = base64.b64encode(buffer.getvalue()).decode('utf-8')
-
-            # Clean up temporary file
-            import os
-            try:
-                os.remove(image_path)
-            except:
-                pass
-
-            return render(request, 'ai_classifier/new_bones_classifier.html', {'result': result, 'img': img_str})
-        except Exception as e:
-            import traceback
-            print(f"Error in bones_detect_view: {str(e)}")
-            print(traceback.format_exc())
-            return render(request, 'ai_classifier/new_bones_classifier.html', {'error': str(e)})
-    return render(request, 'ai_classifier/new_bones_classifier.html')
-
+    """Detect bone fractures from X-ray image."""
+    return _process_ai_classification(
+        request, 
+        ClassifierType.BONES, 
+        'ai_classifier/new_bones_classifier.html'
+    )
 
 
 def brain_detect_view(request):
-    if request.method == 'POST' and request.FILES.get('image'):
-        try:
-            image = request.FILES['image']
-            img = Image.open(io.BytesIO(image.read()))
+    """Detect brain tumors from MRI image."""
+    return _process_ai_classification(
+        request, 
+        ClassifierType.BRAIN, 
+        'ai_classifier/new_brain_classifier.html'
+    )
 
-            # Create temporary file with proper path
-            import tempfile
-            with tempfile.NamedTemporaryFile(delete=False, suffix='.png') as tmp_file:
-                image_path = tmp_file.name
-                img.save(image_path, format='PNG')
-            
-            # Use the already loaded model from brain_classifier module
-            idx, pred = brain_classifier.classifier(image_path, brain_classifier.model, brain_classifier.input_layer)
-            
-            # تحديد الفئة الناتجة عن التصنيف
-            classes=['No tumor', 'Stable tumor', 'Unstable tumor']
-            # idx is already the predicted class index - convert to Python int
-            result = classes[int(idx)]
-            
-            # تحويل الصورة إلى base64
-            img = Image.open(image_path)
-            buffer = io.BytesIO()
-            img.save(buffer, format='JPEG')
-            img_str = base64.b64encode(buffer.getvalue()).decode('utf-8')
 
-            # Clean up temporary file
-            import os
+def ai_classify_api(request):
+    """
+    REST API endpoint for AI classification.
+    
+    Accepts POST requests with:
+    - image: The image file to classify
+    - classifier: One of 'skin', 'brain', 'bones'
+    - generate_heatmap (optional): 'true' to generate Grad-CAM heatmap
+    - use_tta (optional): 'true' to use test-time augmentation
+    - assess_quality (optional): 'true' to assess image quality
+    
+    Returns JSON with classification results.
+    """
+    if request.method != 'POST':
+        return JsonResponse({
+            'success': False,
+            'error': 'Only POST method is allowed',
+            'supported_classifiers': ['skin', 'brain', 'bones']
+        }, status=405)
+    
+    if not request.FILES.get('image'):
+        return JsonResponse({
+            'success': False,
+            'error': 'No image file provided'
+        }, status=400)
+    
+    # Get classifier type
+    classifier_name = request.POST.get('classifier', 'skin').lower()
+    classifier_map = {
+        'skin': ClassifierType.SKIN,
+        'brain': ClassifierType.BRAIN,
+        'bones': ClassifierType.BONES,
+        'xray': ClassifierType.BONES,  # Alias
+    }
+    
+    if classifier_name not in classifier_map:
+        return JsonResponse({
+            'success': False,
+            'error': f'Invalid classifier: {classifier_name}',
+            'supported_classifiers': list(classifier_map.keys())
+        }, status=400)
+    
+    classifier_type = classifier_map[classifier_name]
+    image_path = None
+    
+    try:
+        # Load and validate image
+        image = request.FILES['image']
+        img = Image.open(io.BytesIO(image.read()))
+        
+        if img.mode not in ('RGB', 'L', 'RGBA'):
+            img = img.convert('RGB')
+        
+        # Save to temp file
+        with tempfile.NamedTemporaryFile(delete=False, suffix='.png') as tmp_file:
+            image_path = tmp_file.name
+            img.save(image_path, format='PNG')
+        
+        # Get options from request
+        generate_heatmap = request.POST.get('generate_heatmap', 'false').lower() == 'true'
+        use_tta = request.POST.get('use_tta', 'false').lower() == 'true'
+        assess_quality = request.POST.get('assess_quality', 'true').lower() == 'true'
+        
+        # Perform classification
+        result = classify_image(
+            image_path,
+            classifier_type,
+            generate_heatmap=generate_heatmap,
+            top_n=5,
+            use_tta=use_tta,
+            assess_quality=assess_quality
+        )
+        
+        # Build response
+        response_data = {
+            'success': True,
+            'classifier': classifier_type.value,
+            'result': {
+                'class_name': result.class_name,
+                'confidence': result.confidence,
+                'is_confident': result.is_confident,
+                'severity': result.severity.value,
+                'urgency': result.urgency,
+                'description': result.description,
+            },
+            'top_predictions': [
+                {
+                    'class_name': pred.class_name,
+                    'probability': pred.probability,
+                    'description': pred.description,
+                    'severity': pred.severity.value if pred.severity else None,
+                }
+                for pred in result.top_predictions
+            ],
+            'recommendations': result.recommendations,
+            'preprocessing_applied': result.preprocessing_applied,
+            'inference_time_ms': result.inference_time_ms,
+            'image_hash': result.image_hash,
+        }
+        
+        # Add quality assessment if available
+        if result.quality_assessment:
+            qa = result.quality_assessment
+            response_data['quality_assessment'] = {
+                'overall_quality': qa.overall_quality.value,
+                'quality_score': qa.quality_score,
+                'brightness_score': qa.brightness_score,
+                'contrast_score': qa.contrast_score,
+                'sharpness_score': qa.sharpness_score,
+                'noise_score': qa.noise_score,
+                'is_acceptable': qa.is_acceptable,
+                'issues': qa.issues,
+            }
+        
+        # Add heatmap if generated
+        if result.heatmap_base64:
+            response_data['heatmap_base64'] = result.heatmap_base64
+        
+        return JsonResponse(response_data)
+        
+    except ModelNotFoundError as e:
+        return JsonResponse({
+            'success': False,
+            'error': f'AI model not available: {str(e)}'
+        }, status=503)
+        
+    except (ImageValidationError, ImageQualityError) as e:
+        return JsonResponse({
+            'success': False,
+            'error': f'Image validation failed: {str(e)}'
+        }, status=400)
+        
+    except ClassificationError as e:
+        return JsonResponse({
+            'success': False,
+            'error': f'Classification failed: {str(e)}'
+        }, status=500)
+        
+    except Exception as e:
+        logger.exception(f"Unexpected error in API classification")
+        return JsonResponse({
+            'success': False,
+            'error': 'An unexpected error occurred'
+        }, status=500)
+        
+    finally:
+        if image_path:
             try:
                 os.remove(image_path)
-            except:
+            except OSError:
                 pass
 
-            return render(request, 'ai_classifier/new_brain_classifier.html', {'result': result, 'img': img_str})
-        except Exception as e:
-            import traceback
-            print(f"Error in brain_detect_view: {str(e)}")
-            print(traceback.format_exc())
-            return render(request, 'ai_classifier/new_brain_classifier.html', {'error': str(e)})
-    return render(request, 'ai_classifier/new_brain_classifier.html')
+
+def ai_models_status_api(request):
+    """
+    API endpoint to check AI models status.
+    
+    Returns JSON with status of all AI models.
+    """
+    try:
+        status = check_models_status()
+        model_info = {}
+        
+        for classifier_type in ClassifierType:
+            info = get_model_info(classifier_type)
+            conditions = get_all_conditions(classifier_type)
+            model_info[classifier_type.value] = {
+                'info': info,
+                'conditions': conditions,
+            }
+        
+        return JsonResponse({
+            'success': True,
+            'models_status': status,
+            'model_details': model_info,
+        })
+        
+    except Exception as e:
+        logger.exception("Error checking models status")
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        }, status=500)
+
+
+def ai_models_status_view(request):
+    """API endpoint to check AI models status."""
+    status = check_models_status()
+    return JsonResponse(status)
