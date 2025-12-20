@@ -9,12 +9,13 @@ urlpatterns = [
     path("<str:hospital_user>/login/", views.login_view, name='login'),
     path('logout/', views.logout_view, name='logout'),
     path('after_login/', views.after_login_view, name='after_login'),
-    path('<str:hospital_user>/register/', views.register_view, name='register'),
+    path('register/', views.register_view, name='register'),  # Only patient registration
     
     path('admin_profile/', views.AdminProfileView.as_view(), name='admin_profile'),
     path('user_profile/', views.UserProfileView.as_view(), name='user_profile'),
     
     path('change_password/', views.change_password_view, name='change_password'),
+    path('force_password_change/', views.force_password_change_view, name='force_password_change'),
     
     path('password_reset/',auth_views.PasswordResetView.as_view(template_name= "password_reset_form.html"),name='password_reset'),
     path('password_reset/done/',auth_views.PasswordResetDoneView.as_view(template_name = 'password_reset_sent.html'),name='password_reset_done'),
@@ -28,6 +29,7 @@ urlpatterns = [
     
     path('admin_manager/<str:data>/', views.admin_manager_view, name='admin_manager'),
     
+    path('admin_create_staff/', views.admin_create_staff_view, name='admin_create_staff'),
     path('admin_add_user/<str:hospital_user>/', views.admin_add_user_view, name='admin_add_user'),
     path('admin_pending_accounts/', views.admin_pending_accounts_view, name='admin_pending_accounts'),
     path('admin_account_details/<int:user_id>/', views.admin_account_details_view, name='admin_account_details'),

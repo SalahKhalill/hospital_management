@@ -24,6 +24,8 @@ class User(AbstractUser):
     created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
     approved_at = models.DateTimeField(null=True, blank=True)
     approved_by = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, related_name='approved_users')
+    password_change_required = models.BooleanField(default=False, verbose_name="Password Change Required")
+    temp_password = models.CharField(max_length=20, null=True, blank=True, verbose_name="Temporary Password")
 
 
     

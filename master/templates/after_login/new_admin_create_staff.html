@@ -1,0 +1,155 @@
+{% extends 'new_base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="bi bi-person-plus-fill me-2"></i>Create Staff Account
+                    </h4>
+                </div>
+                <div class="card-body">
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                {% if message.tags == 'success' %}
+                                    <i class="bi bi-check-circle-fill me-2"></i>
+                                {% elif message.tags == 'error' %}
+                                    <i class="bi bi-x-circle-fill me-2"></i>
+                                {% elif message.tags == 'warning' %}
+                                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                                {% else %}
+                                    <i class="bi bi-info-circle-fill me-2"></i>
+                                {% endif %}
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle me-2"></i>
+                        <strong>Note:</strong> You can set a custom password or leave it blank to auto-generate one. 
+                        The staff member will be required to change it on first login.
+                    </div>
+
+                    <form method="post" class="needs-validation" novalidate>
+                        {% csrf_token %}
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="role" class="form-label fw-bold">
+                                    <i class="bi bi-person-badge me-1"></i>Account Type <span class="text-danger">*</span>
+                                </label>
+                                <select class="form-select" id="role" name="role" required>
+                                    <option value="">Select Role...</option>
+                                    {% for role_value, role_display in roles %}
+                                        <option value="{{ role_value }}">{{ role_display }}</option>
+                                    {% endfor %}
+                                </select>
+                                <div class="invalid-feedback">Please select a role.</div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="username" class="form-label fw-bold">
+                                    <i class="bi bi-person me-1"></i>Username <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" class="form-control" id="username" name="username" required 
+                                       pattern="[a-zA-Z0-9_]+" 
+                                       title="Username can only contain letters, numbers, and underscores">
+                                <div class="invalid-feedback">Please provide a valid username (letters, numbers, underscores only).</div>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="first_name" class="form-label fw-bold">
+                                    <i class="bi bi-person-circle me-1"></i>First Name <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" class="form-control" id="first_name" name="first_name" required>
+                                <div class="invalid-feedback">Please provide a first name.</div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="last_name" class="form-label fw-bold">
+                                    <i class="bi bi-person-circle me-1"></i>Last Name <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" class="form-control" id="last_name" name="last_name" required>
+                                <div class="invalid-feedback">Please provide a last name.</div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="email" class="form-label fw-bold">
+                                <i class="bi bi-envelope me-1"></i>Email Address <span class="text-danger">*</span>
+                            </label>
+                            <input type="email" class="form-control" id="email" name="email" required>
+                            <div class="invalid-feedback">Please provide a valid email address.</div>
+                            <small class="text-muted">Credentials will be sent to this email</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="initial_password" class="form-label fw-bold">
+                                <i class="bi bi-key me-1"></i>Initial Password
+                            </label>
+                            <input type="password" class="form-control" id="initial_password" name="initial_password" 
+                                   minlength="8"
+                                   placeholder="Leave blank to auto-generate">
+                            <small class="text-muted">
+                                <i class="bi bi-info-circle me-1"></i>Enter a custom password (min 8 characters) or leave blank to auto-generate a secure password
+                            </small>
+                        </div>
+
+                        <div class="d-grid gap-2 mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="bi bi-check-circle me-2"></i>Create Staff Account
+                            </button>
+                            <a href="{% url 'admin_dashboard' %}" class="btn btn-secondary">
+                                <i class="bi bi-arrow-left me-2"></i>Back to Dashboard
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card shadow mt-4">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-question-circle me-2"></i>How it Works
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <ol class="mb-0">
+                        <li>Fill in the staff member's details above</li>
+                        <li>A secure temporary password will be automatically generated</li>
+                        <li>The credentials will be sent to the staff member's email</li>
+                        <li>The temporary password will also be displayed to you after creation</li>
+                        <li>On first login, the staff member will be forced to change their password</li>
+                        <li>They cannot access the system until they set a new password</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Bootstrap form validation
+    (function () {
+        'use strict'
+        var forms = document.querySelectorAll('.needs-validation')
+        Array.prototype.slice.call(forms).forEach(function (form) {
+            form.addEventListener('submit', function (event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault()
+                    event.stopPropagation()
+                }
+                form.classList.add('was-validated')
+            }, false)
+        })
+    })()
+</script>
+{% endblock %}

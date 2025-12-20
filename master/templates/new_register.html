@@ -47,8 +47,15 @@
                         </div>
                         {% endif %}
 
-                        <form method="POST" action="{% url 'register' hospital_user|default:'patient' %}">
+                        <form method="POST" action="{% url 'register' %}">
                             {% csrf_token %}
+                            
+                            <!-- Account Type Badge -->
+                            <div class="text-center mb-4">
+                                <span class="badge rounded-pill px-3 py-2" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); font-size: 0.875rem;">
+                                    <i class="fas fa-user-tag me-1"></i>Account Type: <strong>Patient</strong>
+                                </span>
+                            </div>
                             
                             <div class="mb-4">
                                 <label for="id_username" class="form-label fw-semibold">
@@ -103,6 +110,24 @@
                                 </div>
                             </div>
 
+                            <div class="mb-4">
+                                <label for="id_email" class="form-label fw-semibold">
+                                    <i class="fas fa-envelope me-2 text-primary"></i>Email Address
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0">
+                                        <i class="fas fa-envelope text-muted"></i>
+                                    </span>
+                                    {{ register_form.email }}
+                                </div>
+                                <small class="text-muted"><i class="fas fa-info-circle me-1"></i>We'll send confirmation to this email</small>
+                                {% if register_form.email.errors %}
+                                <div class="text-danger small mt-1">
+                                    <i class="fas fa-exclamation-circle me-1"></i>{{ register_form.email.errors }}
+                                </div>
+                                {% endif %}
+                            </div>
+
                             <div class="row g-3">
                                 <div class="col-md-6 mb-3">
                                     <label for="id_password1" class="form-label fw-semibold">
@@ -144,14 +169,6 @@
                                 {{ register_form.non_field_errors }}
                             </div>
                             {% endif %}
-
-                            <div class="alert alert-info d-flex align-items-center mb-4">
-                                <i class="fas fa-user-tag me-3 fa-lg"></i>
-                                <div>
-                                    <strong>Registering as:</strong> 
-                                    <span class="badge bg-primary ms-1">{{ hospital_user|title }}</span>
-                                </div>
-                            </div>
 
                             <div class="form-check mb-4">
                                 <input class="form-check-input" type="checkbox" id="terms" required style="width: 18px; height: 18px;">
@@ -243,7 +260,7 @@
 <script>
 // Add Bootstrap classes to form fields
 document.addEventListener('DOMContentLoaded', function() {
-    const inputs = document.querySelectorAll('input[type="text"], input[type="password"]');
+    const inputs = document.querySelectorAll('input[type="text"], input[type="password"], input[type="email"]');
     inputs.forEach(input => {
         input.classList.add('form-control', 'border-start-0');
         
@@ -251,6 +268,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (input.id === 'id_username') input.placeholder = 'Choose a username';
         if (input.id === 'id_first_name') input.placeholder = 'First name';
         if (input.id === 'id_last_name') input.placeholder = 'Last name';
+        if (input.id === 'id_email') input.placeholder = 'your.email@example.com';
         if (input.id === 'id_password1') input.placeholder = 'Create password';
         if (input.id === 'id_password2') input.placeholder = 'Confirm password';
     });

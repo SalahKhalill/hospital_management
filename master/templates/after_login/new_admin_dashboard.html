@@ -28,6 +28,9 @@
                     <span class="badge bg-danger">{{ pendingdoctorcount|add:pendingnursecount|add:pendingpatientcount }}</span>
                     {% endif %}
                 </a>
+                <a href="{% url 'admin_create_staff' %}" class="btn btn-success btn-sm me-2">
+                    <i class="fas fa-user-plus me-1"></i>Create Staff
+                </a>
                 <a href="{% url 'admin_add_user' 'PATIENT' %}" class="btn btn-light btn-sm">
                     <i class="fas fa-user-plus me-1"></i>Add User
                 </a>
