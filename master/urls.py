@@ -29,6 +29,10 @@ urlpatterns = [
     path('admin_manager/<str:data>/', views.admin_manager_view, name='admin_manager'),
     
     path('admin_add_user/<str:hospital_user>/', views.admin_add_user_view, name='admin_add_user'),
+    path('admin_pending_accounts/', views.admin_pending_accounts_view, name='admin_pending_accounts'),
+    path('admin_account_details/<int:user_id>/', views.admin_account_details_view, name='admin_account_details'),
+    path('admin_approve_account/<int:user_id>/', views.admin_approve_account_view, name='admin_approve_account'),
+    path('admin_reject_account/<int:user_id>/', views.admin_reject_account_view, name='admin_reject_account'),
     path('admin_confirm_user/<int:id>/', views.admin_confirm_user_view, name='admin_confirm_user'),
     path('admin_delete_user/<int:id>/', views.admin_delete_user_view, name='admin_delete_user'),
     path('admin_update_user/<int:id>/', views.AdminUpdateUserView.as_view(), name='admin_update_user'),
@@ -73,7 +77,6 @@ urlpatterns = [
 
 
     #---------FOR AI RELATED URLS-------------------------------------
-    path('skin_detect/', views.skin_detect_view, name='skin_detect'),
     path('bones_classifier/', views.bones_detect_view, name='bones_classifier'),
     path('brain_classifier/', views.brain_detect_view, name='brain_classifier'),
     

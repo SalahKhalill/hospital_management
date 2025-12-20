@@ -1,0 +1,56 @@
+# Dataset Download Links
+
+This file contains links to download the datasets required for training the medical classification models.
+
+## Brain Tumor Detection Dataset
+Dataset: Brain MRI Images for Brain Tumor Detection
+Source: Kaggle
+Link: https://www.kaggle.com/datasets/navoneel/brain-mri-images-for-brain-tumor-detection
+
+Description: MRI brain scans for binary classification (tumor vs no tumor)
+Classes: 2 (yes - tumor detected, no - no tumor)
+Format: JPEG/PNG images
+
+Installation Instructions:
+1. Download the dataset from the link above
+2. Extract to: brain_tumor_dataset/
+3. Expected structure:
+   brain_tumor_dataset/
+   ├── yes/  (images with tumors)
+   └── no/   (images without tumors)
+
+
+## Bone Fracture Detection Dataset
+Dataset: Fracture Multi-Region X-ray Data
+Source: Kaggle
+Link: https://www.kaggle.com/datasets/bmadushanirodrigo/fracture-multi-region-x-ray-data
+
+Description: X-ray images for bone fracture detection
+Classes: 2 (fractured, not fractured)
+Format: JPEG/PNG images
+
+Installation Instructions:
+1. Download the dataset from the link above
+2. Extract to: bone_fracture_dataset/
+3. Expected structure:
+   bone_fracture_dataset/
+   └── Bone_Fracture_Binary_Classification/
+       └── Bone_Fracture_Binary_Classification/
+           ├── train/
+           │   ├── fractured/
+           │   └── not fractured/
+           ├── val/
+           │   ├── fractured/
+           │   └── not fractured/
+           └── test/
+               ├── fractured/
+               └── not fractured/
+
+
+## Notes
+- Both datasets are already gitignored and should not be committed to the repository
+- Total dataset size: ~500MB (approximate)
+- Make sure to download and extract before running the training notebooks
+- Training notebooks: 
+  * brain-tumor-detection-v1-0-cnn-vgg-16.ipynb
+  * f1-0-99-bone-fracture-x-ray-tf-cnn.ipynb

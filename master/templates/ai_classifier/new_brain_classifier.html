@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block title %}
-<title>Brain Tumor Detection - AI Classifier</title>
+<title>Brain Tumor Detection - Medical Classifier</title>
 {% endblock %}
 
 {% block content %}
@@ -14,7 +14,7 @@
                 <nav aria-label="breadcrumb">
                     <ol class="breadcrumb mb-3">
                         <li class="breadcrumb-item"><a href="{% url 'home' %}" class="text-white-50 text-decoration-none">Home</a></li>
-                        <li class="breadcrumb-item"><a href="#" class="text-white-50 text-decoration-none">AI Services</a></li>
+                        <li class="breadcrumb-item"><a href="#" class="text-white-50 text-decoration-none">Medical Services</a></li>
                         <li class="breadcrumb-item active text-white" aria-current="page">Brain Tumor Detection</li>
                     </ol>
                 </nav>
@@ -22,7 +22,7 @@
                     <i class="fas fa-brain me-3"></i>Brain Tumor Detection
                 </h1>
                 <p class="lead mb-0 opacity-90">
-                    Advanced AI-powered MRI scan analysis for accurate brain tumor classification using deep learning technology.
+                    Advanced deep learning powered MRI scan analysis for accurate brain tumor classification.
                 </p>
             </div>
             <div class="col-lg-4 text-end d-none d-lg-block" data-aos="fade-left">
@@ -102,7 +102,7 @@
                             </div>
                             <div>
                                 <h4 class="fw-bold mb-1">Analysis Results</h4>
-                                <p class="text-muted mb-0 small">AI-powered diagnostic assessment</p>
+                                <p class="text-muted mb-0 small">Automated diagnostic assessment</p>
                             </div>
                             {% if not is_confident %}
                             <span class="badge bg-warning text-dark ms-auto">
@@ -124,11 +124,12 @@
                                 {% if heatmap %}
                                 <div class="position-relative">
                                     <div class="badge bg-info position-absolute top-0 start-0 m-3 z-1">
-                                        <i class="fas fa-fire me-1"></i>AI Focus Map
+                                        <i class="fas fa-fire me-1"></i>Focus Map
                                     </div>
                                     <img src="data:image/jpeg;base64,{{ heatmap }}" alt="Grad-CAM Heatmap" class="img-fluid rounded-3 shadow">
                                     <p class="text-muted small mt-2 text-center">
-                                        <i class="fas fa-info-circle me-1"></i>Heatmap shows regions the AI focused on
+                                        <i class="fas fa-info-circle me-1"></i>Heatmap shows regions analyzed for diagnosis
+>>>>>>> origin/main
                                     </p>
                                 </div>
                                 {% endif %}
@@ -302,7 +303,7 @@
                                     <div>
                                         <h6 class="fw-bold mb-1">Important Medical Disclaimer</h6>
                                         <p class="mb-0 small">
-                                            This AI analysis is for preliminary screening only. Please consult a qualified neurologist 
+                                            This analysis is for preliminary screening only. Please consult a qualified neurologist 
                                             or radiologist for professional medical diagnosis and treatment recommendations.
                                         </p>
                                     </div>
@@ -349,7 +350,7 @@
                                     <div class="rounded-circle bg-info bg-opacity-10 d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
                                         <i class="fas fa-brain fa-2x text-info"></i>
                                     </div>
-                                    <h6 class="fw-bold">AI Analysis</h6>
+                                    <h6 class="fw-bold">Analysis</h6>
                                     <p class="text-muted small mb-0">Our deep learning model analyzes the scan patterns</p>
                                 </div>
                             </div>

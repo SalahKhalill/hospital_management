@@ -1,0 +1,326 @@
+{% extends 'new_base.html' %}
+{% load static %}
+
+{% block title %}
+<title>Account Details - {{ account_user.username }} - MedCare Hospital</title>
+{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<section class="bg-gradient-custom text-white py-5">
+    <div class="container">
+        <div class="d-flex flex-wrap justify-content-between align-items-center" data-aos="fade-down">
+            <div>
+                <h2 class="display-6 fw-bold mb-2">
+                    <i class="fas fa-user-circle me-2"></i>Account Details
+                </h2>
+                <p class="mb-0 opacity-90">
+                    Review account information for {{ account_user.username }}
+                </p>
+            </div>
+            <div class="text-end mt-3 mt-md-0">
+                <a href="{% url 'admin_pending_accounts' %}" class="btn btn-light btn-sm">
+                    <i class="fas fa-arrow-left me-1"></i>Back to Pending Accounts
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Account Details Content -->
+<section class="py-5">
+    <div class="container">
+        {% if messages %}
+        <div class="mb-4">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert" data-aos="fade-down">
+                <i class="fas fa-{% if message.tags == 'success' %}check-circle{% elif message.tags == 'warning' %}exclamation-triangle{% else %}info-circle{% endif %} me-2"></i>
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <div class="row g-4">
+            <!-- Account Status Card -->
+            <div class="col-12" data-aos="fade-up">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h4 class="mb-0">
+                                <i class="fas fa-info-circle text-primary me-2"></i>Account Status
+                            </h4>
+                            <span class="badge 
+                                {% if account_user.is_approved %}bg-success
+                                {% else %}bg-warning{% endif %} fs-6">
+                                {% if account_user.is_approved %}
+                                    <i class="fas fa-check-circle me-1"></i>Approved
+                                {% else %}
+                                    <i class="fas fa-clock me-1"></i>Pending Approval
+                                {% endif %}
+                            </span>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p class="mb-2">
+                                    <strong><i class="fas fa-user me-2 text-muted"></i>Username:</strong> {{ account_user.username }}
+                                </p>
+                                <p class="mb-2">
+                                    <strong><i class="fas fa-user-tag me-2 text-muted"></i>Role:</strong> 
+                                    <span class="badge 
+                                        {% if account_user.role == 'DOCTOR' %}bg-primary
+                                        {% elif account_user.role == 'NURSE' %}bg-success
+                                        {% elif account_user.role == 'PATIENT' %}bg-info
+                                        {% else %}bg-secondary{% endif %}">
+                                        {{ account_user.get_role_display }}
+                                    </span>
+                                </p>
+                                <p class="mb-2">
+                                    <strong><i class="fas fa-toggle-on me-2 text-muted"></i>Active:</strong>
+                                    {% if account_user.is_active %}
+                                        <span class="text-success"><i class="fas fa-check"></i> Yes</span>
+                                    {% else %}
+                                        <span class="text-danger"><i class="fas fa-times"></i> No</span>
+                                    {% endif %}
+                                </p>
+                            </div>
+                            <div class="col-md-6">
+                                <p class="mb-2">
+                                    <strong><i class="fas fa-calendar-plus me-2 text-muted"></i>Registration Date:</strong>
+                                    {% if account_user.created_at %}
+                                        {{ account_user.created_at|date:"F d, Y - H:i" }}
+                                    {% else %}
+                                        <span class="text-muted">N/A</span>
+                                    {% endif %}
+                                </p>
+                                {% if account_user.approved_at %}
+                                <p class="mb-2">
+                                    <strong><i class="fas fa-check-circle me-2 text-muted"></i>Approved Date:</strong>
+                                    {{ account_user.approved_at|date:"F d, Y - H:i" }}
+                                </p>
+                                {% endif %}
+                                {% if account_user.approved_by %}
+                                <p class="mb-2">
+                                    <strong><i class="fas fa-user-shield me-2 text-muted"></i>Approved By:</strong>
+                                    {{ account_user.approved_by.get_full_name|default:account_user.approved_by.username }}
+                                </p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Personal Information Card -->
+            <div class="col-lg-6" data-aos="fade-up" data-aos-delay="100">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body p-4">
+                        <h4 class="mb-4">
+                            <i class="fas fa-id-card text-primary me-2"></i>Personal Information
+                        </h4>
+                        <div class="mb-3">
+                            <label class="text-muted small mb-1">First Name</label>
+                            <p class="fw-bold">{{ account_user.first_name|default:"Not provided" }}</p>
+                        </div>
+                        <div class="mb-3">
+                            <label class="text-muted small mb-1">Last Name</label>
+                            <p class="fw-bold">{{ account_user.last_name|default:"Not provided" }}</p>
+                        </div>
+                        <div class="mb-3">
+                            <label class="text-muted small mb-1">Email Address</label>
+                            <p class="fw-bold">
+                                {% if account_user.email %}
+                                    <a href="mailto:{{ account_user.email }}">{{ account_user.email }}</a>
+                                {% else %}
+                                    <span class="text-muted">Not provided</span>
+                                {% endif %}
+                            </p>
+                        </div>
+                        {% if profile %}
+                        <div class="mb-3">
+                            <label class="text-muted small mb-1">Gender</label>
+                            <p class="fw-bold">{{ profile.get_gender_display|default:"Not provided" }}</p>
+                        </div>
+                        <div class="mb-3">
+                            <label class="text-muted small mb-1">Mobile</label>
+                            <p class="fw-bold">{{ profile.mobile|default:"Not provided" }}</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Role-Specific Information Card -->
+            <div class="col-lg-6" data-aos="fade-up" data-aos-delay="200">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body p-4">
+                        <h4 class="mb-4">
+                            <i class="fas fa-briefcase text-primary me-2"></i>
+                            {% if account_user.role == 'DOCTOR' %}Doctor
+                            {% elif account_user.role == 'NURSE' %}Nurse
+                            {% elif account_user.role == 'PATIENT' %}Patient
+                            {% endif %} Details
+                        </h4>
+                        {% if profile %}
+                            {% if account_user.role == 'DOCTOR' %}
+                            <div class="mb-3">
+                                <label class="text-muted small mb-1">Specialization</label>
+                                <p class="fw-bold">{{ profile.get_specialization_display|default:"Not specified" }}</p>
+                            </div>
+                            <div class="mb-3">
+                                <label class="text-muted small mb-1">Department</label>
+                                <p class="fw-bold">{{ profile.department|default:"Not assigned" }}</p>
+                            </div>
+                            {% elif account_user.role == 'NURSE' %}
+                            <div class="mb-3">
+                                <label class="text-muted small mb-1">Department</label>
+                                <p class="fw-bold">{{ profile.department|default:"Not assigned" }}</p>
+                            </div>
+                            <div class="mb-3">
+                                <label class="text-muted small mb-1">Shift Time</label>
+                                <p class="fw-bold">{{ profile.get_shift_time_display|default:"Not assigned" }}</p>
+                            </div>
+                            {% elif account_user.role == 'PATIENT' %}
+                            <div class="mb-3">
+                                <label class="text-muted small mb-1">Symptoms</label>
+                                <p class="fw-bold">{{ profile.symptoms|default:"Not provided" }}</p>
+                            </div>
+                            <div class="mb-3">
+                                <label class="text-muted small mb-1">Assigned Doctor</label>
+                                <p class="fw-bold">{{ profile.assigned_doctor|default:"Not assigned" }}</p>
+                            </div>
+                            <div class="mb-3">
+                                <label class="text-muted small mb-1">Admit Date</label>
+                                <p class="fw-bold">{{ profile.admitDate|date:"F d, Y"|default:"N/A" }}</p>
+                            </div>
+                            {% endif %}
+                        {% else %}
+                            <p class="text-muted">Profile information not available.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Location Information Card -->
+            {% if location %}
+            <div class="col-12" data-aos="fade-up" data-aos-delay="300">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body p-4">
+                        <h4 class="mb-4">
+                            <i class="fas fa-map-marker-alt text-primary me-2"></i>Location Information
+                        </h4>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="text-muted small mb-1">Address Line 1</label>
+                                <p class="fw-bold">{{ location.address_1|default:"Not provided" }}</p>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="text-muted small mb-1">Address Line 2</label>
+                                <p class="fw-bold">{{ location.address_2|default:"Not provided" }}</p>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="text-muted small mb-1">City</label>
+                                <p class="fw-bold">{{ location.city|default:"Not provided" }}</p>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="text-muted small mb-1">Province</label>
+                                <p class="fw-bold">{{ location.governorate|default:"Not provided" }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Actions Card -->
+            {% if not account_user.is_approved %}
+            <div class="col-12" data-aos="fade-up" data-aos-delay="400">
+                <div class="card border-0 shadow-sm bg-light">
+                    <div class="card-body p-4">
+                        <h4 class="mb-4">
+                            <i class="fas fa-tasks text-primary me-2"></i>Actions
+                        </h4>
+                        <div class="d-flex gap-3">
+                            <button type="button" 
+                                    class="btn btn-success btn-lg"
+                                    data-bs-toggle="modal" 
+                                    data-bs-target="#approveModal">
+                                <i class="fas fa-check-circle me-2"></i>Approve Account
+                            </button>
+                            <button type="button" 
+                                    class="btn btn-danger btn-lg"
+                                    data-bs-toggle="modal" 
+                                    data-bs-target="#rejectModal">
+                                <i class="fas fa-times-circle me-2"></i>Reject & Delete
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</section>
+
+<!-- Approve Confirmation Modal -->
+<div class="modal fade" id="approveModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-check-circle me-2"></i>Confirm Account Approval
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to approve this account?</p>
+                <p class="mb-0"><strong>User:</strong> {{ account_user.username }}</p>
+                <p class="mb-0"><strong>Role:</strong> {{ account_user.get_role_display }}</p>
+                <p class="mb-0 mt-2 text-muted small">The user will be able to log in immediately after approval.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form method="post" action="{% url 'admin_approve_account' account_user.id %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-check me-1"></i>Approve Account
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Reject Confirmation Modal -->
+<div class="modal fade" id="rejectModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-times-circle me-2"></i>Confirm Account Rejection
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <strong>Warning:</strong> This action cannot be undone. The account will be permanently deleted.
+                </div>
+                <p>Are you sure you want to reject and delete this account?</p>
+                <p class="mb-0"><strong>User:</strong> {{ account_user.username }}</p>
+                <p class="mb-0"><strong>Role:</strong> {{ account_user.get_role_display }}</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form method="post" action="{% url 'admin_reject_account' account_user.id %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash me-1"></i>Reject & Delete
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

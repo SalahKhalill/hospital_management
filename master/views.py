@@ -2,7 +2,7 @@ import os
 from django.utils.http import urlencode
 from django.conf import settings
 from xhtml2pdf import pisa
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse, JsonResponse
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm, UsernameField, PasswordChangeForm
 from django.contrib.auth.decorators import login_required, user_passes_test
@@ -64,13 +64,18 @@ def login_view(request, hospital_user):
             password = login_form.cleaned_data.get('password')
             user = authenticate(username=username, password=password)
             if user is not None:
+                # Check if account is approved
+                if not user.is_approved:
+                    messages.warning(request, f"Your account is not approved yet. Please wait for approval or contact admin.")
+                    return redirect('home')
+                
                 if is_admin(user):
                     if user.is_staff:
                         login(request, user)
                         messages.success(request, f"You are logged successfully as {user.username}.")
                         return redirect('after_login')
                     else:
-                        messages.warning(request, f"Sorry, your account has not been confirmed yet.")
+                        messages.warning(request, f"Your account is not approved yet. Please wait for approval or contact admin.")
                         return redirect('home')
                 else:
                     if user.is_active:
@@ -78,12 +83,12 @@ def login_view(request, hospital_user):
                         messages.success(request, f"You are logged successfully as {user.username}.")
                         return redirect('after_login')
                     else:
-                        messages.warning(request, f"Sorry, your account has not been confirmed yet.")
+                        messages.warning(request, f"Your account is not approved yet. Please wait for approval or contact admin.")
                         return redirect('home')
             else:
-                messages.warning(request, f"An error occured trying to login.")
+                messages.warning(request, f"Invalid username or password.")
         else:
-            messages.warning(request, f"An error occured trying to login.")
+            messages.warning(request, f"Invalid username or password.")
     elif request.method == "GET":
         login_form = AuthenticationForm()
     return render(request, 'new_login.html', {"login_form":login_form, "hospital_user":hospital_user})
@@ -370,11 +375,19 @@ def admin_add_user_view(request, hospital_user):
             user.role = hospital_user
             if hospital_user=='ADMIN':
                 user.is_staff = True
+                user.is_active = True
+                user.is_approved = True
+                user.approved_by = request.user
+                user.approved_at = timezone.now()
                 user.save()
                 user.refresh_from_db()
                 messages.success(request, f"The user {user.username} has been successfully added as a {hospital_user}.")
                 return redirect('admin_dashboard')
             else:
+                user.is_active = True
+                user.is_approved = True
+                user.approved_by = request.user
+                user.approved_at = timezone.now()
                 user.save()
                 user.refresh_from_db()
                 messages.success(request, f"The user {user.username} has been successfully added as a {hospital_user}.")
@@ -384,6 +397,106 @@ def admin_add_user_view(request, hospital_user):
     elif request.method == 'GET':
         user_form = CustomUserCreationForm()
     return render(request, 'after_login/new_admin_add_user.html', {'user_form':user_form, 'hospital_user':hospital_user})
+
+
+
+@login_required
+@user_passes_test(is_admin)
+def admin_pending_accounts_view(request):
+    """View all pending accounts awaiting admin approval"""
+    pending_users = User.objects.filter(is_approved=False, is_active=False).order_by('-created_at')
+    
+    # Separate by role for better organization
+    pending_doctors = pending_users.filter(role='DOCTOR')
+    pending_nurses = pending_users.filter(role='NURSE')
+    pending_patients = pending_users.filter(role='PATIENT')
+    
+    context = {
+        'pending_users': pending_users,
+        'pending_doctors': pending_doctors,
+        'pending_nurses': pending_nurses,
+        'pending_patients': pending_patients,
+        'total_pending': pending_users.count(),
+    }
+    return render(request, 'after_login/new_admin_pending_accounts.html', context)
+
+
+@login_required
+@user_passes_test(is_admin)
+def admin_account_details_view(request, user_id):
+    """View detailed information about a pending account"""
+    user = get_object_or_404(User, id=user_id)
+    
+    # Get role-specific details
+    profile = None
+    location = None
+    
+    if is_doctor(user):
+        profile = user.doctor
+        location = user.doctor.location
+    elif is_nurse(user):
+        profile = user.nurse
+        location = user.nurse.location
+    elif is_patient(user):
+        profile = user.patient
+        location = user.patient.location
+    
+    context = {
+        'account_user': user,
+        'profile': profile,
+        'location': location,
+    }
+    return render(request, 'after_login/new_admin_account_details.html', context)
+
+
+@login_required
+@user_passes_test(is_admin)
+def admin_approve_account_view(request, user_id):
+    """Approve a pending account"""
+    user = get_object_or_404(User, id=user_id)
+    
+    if request.method == 'POST':
+        user.is_approved = True
+        user.is_active = True
+        user.approved_by = request.user
+        user.approved_at = timezone.now()
+        user.save()
+        
+        messages.success(request, f"Account for {user.get_full_name() or user.username} ({user.role}) has been approved successfully.")
+        
+        # Send email notification if email exists
+        if user.email:
+            try:
+                send_mail(
+                    subject='Account Approved - Hospital Management System',
+                    message=f'Dear {user.get_full_name() or user.username},\n\nYour account has been approved by the administrator. You can now log in to the system.\n\nUsername: {user.username}\n\nThank you.',
+                    from_email=None,  # Will use DEFAULT_FROM_EMAIL from settings
+                    recipient_list=[user.email],
+                    fail_silently=True,
+                )
+            except Exception as e:
+                logger.warning(f"Failed to send approval email to {user.email}: {str(e)}")
+        
+        return redirect('admin_pending_accounts')
+    
+    return redirect('admin_account_details', user_id=user_id)
+
+
+@login_required
+@user_passes_test(is_admin)
+def admin_reject_account_view(request, user_id):
+    """Reject and delete a pending account"""
+    user = get_object_or_404(User, id=user_id)
+    
+    if request.method == 'POST':
+        username = user.username
+        role = user.role
+        user.delete()
+        
+        messages.warning(request, f"Account for {username} ({role}) has been rejected and deleted.")
+        return redirect('admin_pending_accounts')
+    
+    return redirect('admin_account_details', user_id=user_id)
 
 
 
@@ -874,7 +987,7 @@ def send_mail_view(request, id):
 
 
 #---------------------------------------------------------------------------------
-#------------------------ AI RELATED VIEWS START ------------------------------
+#------------------------ MEDICAL CLASSIFICATION RELATED VIEWS START ------------------------------
 #---------------------------------------------------------------------------------
 
 def _get_severity_color(severity: Severity) -> str:
@@ -891,7 +1004,7 @@ def _get_severity_color(severity: Severity) -> str:
 
 def _process_ai_classification(request, classifier_type: ClassifierType, template_name: str):
     """
-    Advanced AI classification handler with comprehensive results.
+    Advanced medical classification handler with comprehensive results.
     
     Features:
     - Image preprocessing and enhancement
@@ -1014,7 +1127,7 @@ def _process_ai_classification(request, classifier_type: ClassifierType, templat
         except ModelNotFoundError as e:
             logger.error(f"Model not found for {classifier_type.value}: {str(e)}")
             context['error'] = (
-                f"AI model not available. Please ensure the {classifier_type.value}.h5 "
+                f"Classification model not available. Please ensure the {classifier_type.value}.h5 "
                 "model file is downloaded and placed in the 'models' folder."
             )
             
@@ -1045,15 +1158,6 @@ def _process_ai_classification(request, classifier_type: ClassifierType, templat
     return render(request, template_name, context)
 
 
-def skin_detect_view(request):
-    """Detect skin conditions from uploaded image."""
-    return _process_ai_classification(
-        request, 
-        ClassifierType.SKIN, 
-        'ai_classifier/new_skin_classifier.html'
-    )
-
-
 def bones_detect_view(request):
     """Detect bone fractures from X-ray image."""
     return _process_ai_classification(
@@ -1074,7 +1178,7 @@ def brain_detect_view(request):
 
 def ai_classify_api(request):
     """
-    REST API endpoint for AI classification.
+    REST API endpoint for medical classification.
     
     Accepts POST requests with:
     - image: The image file to classify
@@ -1099,9 +1203,8 @@ def ai_classify_api(request):
         }, status=400)
     
     # Get classifier type
-    classifier_name = request.POST.get('classifier', 'skin').lower()
+    classifier_name = request.POST.get('classifier', 'brain').lower()
     classifier_map = {
-        'skin': ClassifierType.SKIN,
         'brain': ClassifierType.BRAIN,
         'bones': ClassifierType.BONES,
         'xray': ClassifierType.BONES,  # Alias
@@ -1195,7 +1298,7 @@ def ai_classify_api(request):
     except ModelNotFoundError as e:
         return JsonResponse({
             'success': False,
-            'error': f'AI model not available: {str(e)}'
+            'error': f'Classification model not available: {str(e)}'
         }, status=503)
         
     except (ImageValidationError, ImageQualityError) as e:
@@ -1227,9 +1330,9 @@ def ai_classify_api(request):
 
 def ai_models_status_api(request):
     """
-    API endpoint to check AI models status.
+    API endpoint to check classification models status.
     
-    Returns JSON with status of all AI models.
+    Returns JSON with status of all classification models.
     """
     try:
         status = check_models_status()

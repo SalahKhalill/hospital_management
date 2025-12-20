@@ -1,0 +1,18 @@
+{
+  "model_name": "bone_fracture_detection_cnn",
+  "final_val_accuracy": 0.9513972997665405,
+  "final_train_accuracy": 0.9972943663597107,
+  "final_test_accuracy": 0.9620000123977661,
+  "final_test_loss": 0.08421674370765686,
+  "epochs_trained": 10,
+  "architecture": "Custom CNN (3 Conv2D + MaxPool layers)",
+  "input_size": [
+    128,
+    128,
+    3
+  ],
+  "classes": {
+    "0": "No fracture",
+    "1": "Fractured"
+  }
+}
