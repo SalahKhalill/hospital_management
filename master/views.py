@@ -64,13 +64,18 @@ def login_view(request, hospital_user):
             password = login_form.cleaned_data.get('password')
             user = authenticate(username=username, password=password)
             if user is not None:
+                # Check if account is approved
+                if not user.is_approved:
+                    messages.warning(request, f"Your account is not approved yet. Please wait for approval or contact admin.")
+                    return redirect('home')
+                
                 if is_admin(user):
                     if user.is_staff:
                         login(request, user)
                         messages.success(request, f"You are logged successfully as {user.username}.")
                         return redirect('after_login')
                     else:
-                        messages.warning(request, f"Sorry, your account has not been confirmed yet.")
+                        messages.warning(request, f"Your account is not approved yet. Please wait for approval or contact admin.")
                         return redirect('home')
                 else:
                     if user.is_active:
@@ -78,12 +83,12 @@ def login_view(request, hospital_user):
                         messages.success(request, f"You are logged successfully as {user.username}.")
                         return redirect('after_login')
                     else:
-                        messages.warning(request, f"Sorry, your account has not been confirmed yet.")
+                        messages.warning(request, f"Your account is not approved yet. Please wait for approval or contact admin.")
                         return redirect('home')
             else:
-                messages.warning(request, f"An error occured trying to login.")
+                messages.warning(request, f"Invalid username or password.")
         else:
-            messages.warning(request, f"An error occured trying to login.")
+            messages.warning(request, f"Invalid username or password.")
     elif request.method == "GET":
         login_form = AuthenticationForm()
     return render(request, 'new_login.html', {"login_form":login_form, "hospital_user":hospital_user})

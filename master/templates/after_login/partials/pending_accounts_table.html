@@ -19,19 +19,19 @@
         <tbody>
             {% for account in accounts %}
             <tr>
-                <td>
+                <td class="text-dark">
                     <strong>{{ account.username }}</strong>
                 </td>
-                <td>
+                <td class="text-dark">
                     {% if account.first_name or account.last_name %}
                         {{ account.get_full_name }}
                     {% else %}
                         <span class="text-muted fst-italic">Not provided</span>
                     {% endif %}
                 </td>
-                <td>
+                <td class="text-dark">
                     {% if account.email %}
-                        <a href="mailto:{{ account.email }}">{{ account.email }}</a>
+                        <a href="mailto:{{ account.email }}" class="text-primary">{{ account.email }}</a>
                     {% else %}
                         <span class="text-muted fst-italic">Not provided</span>
                     {% endif %}
@@ -45,9 +45,9 @@
                         {{ account.get_role_display }}
                     </span>
                 </td>
-                <td>
+                <td class="text-dark">
                     {% if account.created_at %}
-                        <small>{{ account.created_at|date:"M d, Y" }}<br>{{ account.created_at|time:"H:i" }}</small>
+                        <small class="text-dark">{{ account.created_at|date:"M d, Y" }}<br>{{ account.created_at|time:"H:i" }}</small>
                     {% else %}
                         <span class="text-muted">N/A</span>
                     {% endif %}

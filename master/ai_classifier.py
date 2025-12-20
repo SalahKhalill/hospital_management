@@ -221,122 +221,6 @@ class ImageQualityError(Exception):
 # ============================================================================
 
 CLASSIFIER_CONFIG = {
-<<<<<<< HEAD
-=======
-    ClassifierType.SKIN: {
-        'classes': [
-            'Actinic Keratosis',
-            'Basal Cell Carcinoma',
-            'Dermatofibroma',
-            'Melanoma',
-            'Nevus',
-            'Pigmented Benign Keratosis',
-            'Seborrheic Keratosis',
-            'Squamous Cell Carcinoma',
-            'Vascular Lesion'
-        ],
-        'severity_mapping': {
-            0: Severity.MODERATE,
-            1: Severity.HIGH,
-            2: Severity.LOW,
-            3: Severity.CRITICAL,
-            4: Severity.NORMAL,
-            5: Severity.LOW,
-            6: Severity.LOW,
-            7: Severity.HIGH,
-            8: Severity.LOW,
-        },
-        'urgency_mapping': {
-            0: "Schedule appointment within 2 weeks",
-            1: "Schedule appointment within 1 week",
-            2: "Routine follow-up",
-            3: "URGENT - Seek immediate consultation",
-            4: "Annual monitoring",
-            5: "Routine follow-up",
-            6: "Routine follow-up",
-            7: "Schedule appointment within 1 week",
-            8: "Routine follow-up",
-        },
-        'descriptions': {
-            0: "Precancerous scaly patch caused by sun damage. Can develop into squamous cell carcinoma if untreated.",
-            1: "Most common form of skin cancer. Usually grows slowly and rarely spreads but requires treatment.",
-            2: "Benign fibrous skin nodule. Usually harmless and doesn't require treatment.",
-            3: "Most dangerous form of skin cancer. Develops from pigment-producing cells. Early detection is crucial.",
-            4: "Common benign mole. Monitor for changes using the ABCDE rule.",
-            5: "Benign pigmented skin growth. No treatment necessary unless cosmetically desired.",
-            6: "Common benign growth that appears with aging. Waxy, scaly appearance.",
-            7: "Second most common skin cancer. Can spread if not treated early.",
-            8: "Abnormality of blood vessels. Usually benign but may require evaluation.",
-        },
-        'recommendations': {
-            0: [
-                "Schedule dermatologist appointment within 2 weeks",
-                "Avoid sun exposure on affected area",
-                "Use broad-spectrum SPF 50+ sunscreen",
-                "Document any changes with photos",
-                "May require cryotherapy or topical treatment"
-            ],
-            1: [
-                "Consult dermatologist within 1 week",
-                "Surgical removal is typically recommended",
-                "Excellent prognosis with early treatment",
-                "Regular skin checks after treatment",
-                "Protect skin from further sun damage"
-            ],
-            2: [
-                "Usually no treatment necessary",
-                "Monitor for any changes in size or appearance",
-                "Can be removed if symptomatic or cosmetically desired",
-                "Routine annual skin check recommended"
-            ],
-            3: [
-                "⚠️ URGENT: Contact dermatologist IMMEDIATELY",
-                "Do not delay - early treatment saves lives",
-                "Prepare for possible biopsy",
-                "Avoid sun exposure completely",
-                "Document lesion with photos for comparison",
-                "Consider genetic counseling if family history exists"
-            ],
-            4: [
-                "Normal mole - no immediate concern",
-                "Monitor using ABCDE rule monthly",
-                "Take photos to track any changes",
-                "Annual dermatologist skin check recommended",
-                "Use sun protection to prevent changes"
-            ],
-            5: [
-                "Benign lesion - no treatment needed",
-                "Can be removed for cosmetic reasons",
-                "Monitor for any changes",
-                "Annual skin check recommended"
-            ],
-            6: [
-                "Common benign growth with aging",
-                "No treatment necessary unless irritated",
-                "Can be removed if symptomatic",
-                "Not associated with skin cancer"
-            ],
-            7: [
-                "Schedule dermatologist appointment within 1 week",
-                "Surgical removal typically recommended",
-                "Good prognosis with early treatment",
-                "Regular follow-up examinations needed",
-                "Strict sun protection essential"
-            ],
-            8: [
-                "Usually benign vascular anomaly",
-                "Consult if bleeding or rapidly changing",
-                "May be treated with laser therapy if desired",
-                "Monitor for any changes"
-            ],
-        },
-        'confidence_threshold': 0.60,
-        'min_image_size': (50, 50),
-        'preprocessing': ['denoise', 'normalize_lighting'],
-        'tta_rotations': [0, 90, 180, 270],
-        'tta_flips': [False, True],
-    },
->>>>>>> origin/main
     ClassifierType.BRAIN: {
         'classes': [
             'No Tumor',
@@ -383,10 +267,7 @@ CLASSIFIER_CONFIG = {
             'No Fracture',
             'Fractured'
         ],
-<<<<<<< HEAD
         'is_binary': True,
-=======
->>>>>>> origin/main
         'severity_mapping': {
             0: Severity.NORMAL,
             1: Severity.HIGH,
@@ -798,11 +679,7 @@ class GradCAMGenerator:
         
         # Add labels
         cv2.putText(original_resized, "Original", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
-<<<<<<< HEAD
         cv2.putText(heatmap_resized, "Focus", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
-=======
-        cv2.putText(heatmap_resized, "AI Focus", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
->>>>>>> origin/main
         
         return np.hstack([original_resized, heatmap_resized])
 
@@ -924,10 +801,6 @@ class LazyModelLoader:
                 except:
                     # Default input shapes based on model type
                     default_shapes = {
-<<<<<<< HEAD
-=======
-                        ClassifierType.SKIN: [None, 224, 224, 3],
->>>>>>> origin/main
                         ClassifierType.BRAIN: [None, 224, 224, 3],
                         ClassifierType.BONES: [None, 224, 224, 3],
                     }
@@ -1201,10 +1074,6 @@ def classify_image(
 def _get_specialist_for_classifier(classifier_type: ClassifierType) -> str:
     """Get the recommended specialist type for each classifier."""
     specialists = {
-<<<<<<< HEAD
-=======
-        ClassifierType.SKIN: "Dermatologist",
->>>>>>> origin/main
         ClassifierType.BRAIN: "Neurologist/Neuro-oncologist",
         ClassifierType.BONES: "Orthopedic Specialist/Radiologist",
     }
