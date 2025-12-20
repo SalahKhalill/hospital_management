@@ -73,7 +73,6 @@ urlpatterns = [
 
 
     #---------FOR AI RELATED URLS-------------------------------------
-    path('skin_detect/', views.skin_detect_view, name='skin_detect'),
     path('bones_classifier/', views.bones_detect_view, name='bones_classifier'),
     path('brain_classifier/', views.brain_detect_view, name='brain_classifier'),
     

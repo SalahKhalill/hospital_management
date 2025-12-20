@@ -1,6 +1,0 @@
-# This folder contains AI model files (.h5)
-# Download models from Google Drive links in "AI Models drive links.txt"
-# Required files:
-#   - brain.h5
-#   - skin.h5
-#   - xray.h5

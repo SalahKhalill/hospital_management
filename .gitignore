@@ -147,3 +147,11 @@ logs/
 .env.local
 .env.production
 brain-tumor-detection-v1-0-cnn-vgg-16.ipynb
+f1-0-99-bone-fracture-x-ray-tf-cnn.ipynb
+archive(1).zip
+
+# Dataset folders (exclude from git)
+bone_fracture_dataset/
+brain_tumor_dataset/
+training_output.log
+

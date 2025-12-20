@@ -874,7 +874,7 @@ def send_mail_view(request, id):
 
 
 #---------------------------------------------------------------------------------
-#------------------------ AI RELATED VIEWS START ------------------------------
+#------------------------ MEDICAL CLASSIFICATION RELATED VIEWS START ------------------------------
 #---------------------------------------------------------------------------------
 
 def _get_severity_color(severity: Severity) -> str:
@@ -891,7 +891,7 @@ def _get_severity_color(severity: Severity) -> str:
 
 def _process_ai_classification(request, classifier_type: ClassifierType, template_name: str):
     """
-    Advanced AI classification handler with comprehensive results.
+    Advanced medical classification handler with comprehensive results.
     
     Features:
     - Image preprocessing and enhancement
@@ -1014,7 +1014,7 @@ def _process_ai_classification(request, classifier_type: ClassifierType, templat
         except ModelNotFoundError as e:
             logger.error(f"Model not found for {classifier_type.value}: {str(e)}")
             context['error'] = (
-                f"AI model not available. Please ensure the {classifier_type.value}.h5 "
+                f"Classification model not available. Please ensure the {classifier_type.value}.h5 "
                 "model file is downloaded and placed in the 'models' folder."
             )
             
@@ -1045,15 +1045,6 @@ def _process_ai_classification(request, classifier_type: ClassifierType, templat
     return render(request, template_name, context)
 
 
-def skin_detect_view(request):
-    """Detect skin conditions from uploaded image."""
-    return _process_ai_classification(
-        request, 
-        ClassifierType.SKIN, 
-        'ai_classifier/new_skin_classifier.html'
-    )
-
-
 def bones_detect_view(request):
     """Detect bone fractures from X-ray image."""
     return _process_ai_classification(
@@ -1074,7 +1065,7 @@ def brain_detect_view(request):
 
 def ai_classify_api(request):
     """
-    REST API endpoint for AI classification.
+    REST API endpoint for medical classification.
     
     Accepts POST requests with:
     - image: The image file to classify
@@ -1099,9 +1090,8 @@ def ai_classify_api(request):
         }, status=400)
     
     # Get classifier type
-    classifier_name = request.POST.get('classifier', 'skin').lower()
+    classifier_name = request.POST.get('classifier', 'brain').lower()
     classifier_map = {
-        'skin': ClassifierType.SKIN,
         'brain': ClassifierType.BRAIN,
         'bones': ClassifierType.BONES,
         'xray': ClassifierType.BONES,  # Alias
@@ -1195,7 +1185,7 @@ def ai_classify_api(request):
     except ModelNotFoundError as e:
         return JsonResponse({
             'success': False,
-            'error': f'AI model not available: {str(e)}'
+            'error': f'Classification model not available: {str(e)}'
         }, status=503)
         
     except (ImageValidationError, ImageQualityError) as e:
@@ -1227,9 +1217,9 @@ def ai_classify_api(request):
 
 def ai_models_status_api(request):
     """
-    API endpoint to check AI models status.
+    API endpoint to check classification models status.
     
-    Returns JSON with status of all AI models.
+    Returns JSON with status of all classification models.
     """
     try:
         status = check_models_status()
