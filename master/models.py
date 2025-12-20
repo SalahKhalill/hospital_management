@@ -20,6 +20,10 @@ class User(AbstractUser):
     
     # id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
     role = models.CharField(max_length=10, choices=Role.choices, default=Role.ADMIN)
+    is_approved = models.BooleanField(default=False, verbose_name="Account Approved")
+    created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+    approved_at = models.DateTimeField(null=True, blank=True)
+    approved_by = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, related_name='approved_users')
 
 
     

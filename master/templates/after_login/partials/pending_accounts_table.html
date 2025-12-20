@@ -1,0 +1,89 @@
+{% if accounts.count == 0 %}
+<div class="alert alert-info" data-aos="fade-up">
+    <i class="fas fa-info-circle me-2"></i>
+    No pending accounts in this category.
+</div>
+{% else %}
+<div class="table-responsive" data-aos="fade-up">
+    <table class="table table-hover align-middle">
+        <thead class="table-light">
+            <tr>
+                <th><i class="fas fa-user me-2"></i>Username</th>
+                <th><i class="fas fa-id-card me-2"></i>Full Name</th>
+                <th><i class="fas fa-envelope me-2"></i>Email</th>
+                <th><i class="fas fa-user-tag me-2"></i>Role</th>
+                <th><i class="fas fa-calendar me-2"></i>Registered</th>
+                <th class="text-center"><i class="fas fa-cog me-2"></i>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for account in accounts %}
+            <tr>
+                <td>
+                    <strong>{{ account.username }}</strong>
+                </td>
+                <td>
+                    {% if account.first_name or account.last_name %}
+                        {{ account.get_full_name }}
+                    {% else %}
+                        <span class="text-muted fst-italic">Not provided</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if account.email %}
+                        <a href="mailto:{{ account.email }}">{{ account.email }}</a>
+                    {% else %}
+                        <span class="text-muted fst-italic">Not provided</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <span class="badge 
+                        {% if account.role == 'DOCTOR' %}bg-primary
+                        {% elif account.role == 'NURSE' %}bg-success
+                        {% elif account.role == 'PATIENT' %}bg-info
+                        {% else %}bg-secondary{% endif %}">
+                        {{ account.get_role_display }}
+                    </span>
+                </td>
+                <td>
+                    {% if account.created_at %}
+                        <small>{{ account.created_at|date:"M d, Y" }}<br>{{ account.created_at|time:"H:i" }}</small>
+                    {% else %}
+                        <span class="text-muted">N/A</span>
+                    {% endif %}
+                </td>
+                <td class="text-center">
+                    <div class="btn-group" role="group">
+                        <a href="{% url 'admin_account_details' account.id %}" 
+                           class="btn btn-sm btn-outline-info" 
+                           title="View Details">
+                            <i class="fas fa-info-circle"></i> Details
+                        </a>
+                        <button type="button" 
+                                class="btn btn-sm btn-outline-success" 
+                                data-bs-toggle="modal" 
+                                data-bs-target="#approveModal"
+                                data-approve-id="{{ account.id }}"
+                                data-approve-username="{{ account.username }}"
+                                data-approve-role="{{ account.get_role_display }}"
+                                title="Approve Account">
+                            <i class="fas fa-check"></i> Approve
+                        </button>
+                        <button type="button" 
+                                class="btn btn-sm btn-outline-danger" 
+                                data-bs-toggle="modal" 
+                                data-bs-target="#rejectModal"
+                                data-reject-id="{{ account.id }}"
+                                data-reject-username="{{ account.username }}"
+                                data-reject-role="{{ account.get_role_display }}"
+                                title="Reject Account">
+                            <i class="fas fa-times"></i> Reject
+                        </button>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endif %}

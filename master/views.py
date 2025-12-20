@@ -2,7 +2,7 @@ import os
 from django.utils.http import urlencode
 from django.conf import settings
 from xhtml2pdf import pisa
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse, JsonResponse
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm, UsernameField, PasswordChangeForm
 from django.contrib.auth.decorators import login_required, user_passes_test
@@ -370,11 +370,19 @@ def admin_add_user_view(request, hospital_user):
             user.role = hospital_user
             if hospital_user=='ADMIN':
                 user.is_staff = True
+                user.is_active = True
+                user.is_approved = True
+                user.approved_by = request.user
+                user.approved_at = timezone.now()
                 user.save()
                 user.refresh_from_db()
                 messages.success(request, f"The user {user.username} has been successfully added as a {hospital_user}.")
                 return redirect('admin_dashboard')
             else:
+                user.is_active = True
+                user.is_approved = True
+                user.approved_by = request.user
+                user.approved_at = timezone.now()
                 user.save()
                 user.refresh_from_db()
                 messages.success(request, f"The user {user.username} has been successfully added as a {hospital_user}.")
@@ -384,6 +392,106 @@ def admin_add_user_view(request, hospital_user):
     elif request.method == 'GET':
         user_form = CustomUserCreationForm()
     return render(request, 'after_login/new_admin_add_user.html', {'user_form':user_form, 'hospital_user':hospital_user})
+
+
+
+@login_required
+@user_passes_test(is_admin)
+def admin_pending_accounts_view(request):
+    """View all pending accounts awaiting admin approval"""
+    pending_users = User.objects.filter(is_approved=False, is_active=False).order_by('-created_at')
+    
+    # Separate by role for better organization
+    pending_doctors = pending_users.filter(role='DOCTOR')
+    pending_nurses = pending_users.filter(role='NURSE')
+    pending_patients = pending_users.filter(role='PATIENT')
+    
+    context = {
+        'pending_users': pending_users,
+        'pending_doctors': pending_doctors,
+        'pending_nurses': pending_nurses,
+        'pending_patients': pending_patients,
+        'total_pending': pending_users.count(),
+    }
+    return render(request, 'after_login/new_admin_pending_accounts.html', context)
+
+
+@login_required
+@user_passes_test(is_admin)
+def admin_account_details_view(request, user_id):
+    """View detailed information about a pending account"""
+    user = get_object_or_404(User, id=user_id)
+    
+    # Get role-specific details
+    profile = None
+    location = None
+    
+    if is_doctor(user):
+        profile = user.doctor
+        location = user.doctor.location
+    elif is_nurse(user):
+        profile = user.nurse
+        location = user.nurse.location
+    elif is_patient(user):
+        profile = user.patient
+        location = user.patient.location
+    
+    context = {
+        'account_user': user,
+        'profile': profile,
+        'location': location,
+    }
+    return render(request, 'after_login/new_admin_account_details.html', context)
+
+
+@login_required
+@user_passes_test(is_admin)
+def admin_approve_account_view(request, user_id):
+    """Approve a pending account"""
+    user = get_object_or_404(User, id=user_id)
+    
+    if request.method == 'POST':
+        user.is_approved = True
+        user.is_active = True
+        user.approved_by = request.user
+        user.approved_at = timezone.now()
+        user.save()
+        
+        messages.success(request, f"Account for {user.get_full_name() or user.username} ({user.role}) has been approved successfully.")
+        
+        # Send email notification if email exists
+        if user.email:
+            try:
+                send_mail(
+                    subject='Account Approved - Hospital Management System',
+                    message=f'Dear {user.get_full_name() or user.username},\n\nYour account has been approved by the administrator. You can now log in to the system.\n\nUsername: {user.username}\n\nThank you.',
+                    from_email=None,  # Will use DEFAULT_FROM_EMAIL from settings
+                    recipient_list=[user.email],
+                    fail_silently=True,
+                )
+            except Exception as e:
+                logger.warning(f"Failed to send approval email to {user.email}: {str(e)}")
+        
+        return redirect('admin_pending_accounts')
+    
+    return redirect('admin_account_details', user_id=user_id)
+
+
+@login_required
+@user_passes_test(is_admin)
+def admin_reject_account_view(request, user_id):
+    """Reject and delete a pending account"""
+    user = get_object_or_404(User, id=user_id)
+    
+    if request.method == 'POST':
+        username = user.username
+        role = user.role
+        user.delete()
+        
+        messages.warning(request, f"Account for {username} ({role}) has been rejected and deleted.")
+        return redirect('admin_pending_accounts')
+    
+    return redirect('admin_account_details', user_id=user_id)
 
 
 

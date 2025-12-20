@@ -1,0 +1,195 @@
+{% extends 'new_base.html' %}
+{% load static %}
+
+{% block title %}
+<title>Pending Account Approvals - MedCare Hospital</title>
+{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<section class="bg-gradient-custom text-white py-5">
+    <div class="container">
+        <div class="d-flex flex-wrap justify-content-between align-items-center" data-aos="fade-down">
+            <div>
+                <h2 class="display-6 fw-bold mb-2">
+                    <i class="fas fa-user-clock me-2"></i>Pending Account Approvals
+                </h2>
+                <p class="mb-0 opacity-90">
+                    Review and approve new account registrations
+                </p>
+            </div>
+            <div class="text-end mt-3 mt-md-0">
+                <span class="badge bg-warning fs-5">
+                    <i class="fas fa-exclamation-circle me-1"></i>{{ total_pending }} Pending
+                </span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Pending Accounts Content -->
+<section class="py-5">
+    <div class="container">
+        {% if messages %}
+        <div class="mb-4">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert" data-aos="fade-down">
+                <i class="fas fa-{% if message.tags == 'success' %}check-circle{% elif message.tags == 'warning' %}exclamation-triangle{% else %}info-circle{% endif %} me-2"></i>
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        {% if total_pending == 0 %}
+        <!-- No Pending Accounts -->
+        <div class="text-center py-5" data-aos="fade-up">
+            <div class="mb-4">
+                <i class="fas fa-check-circle text-success" style="font-size: 5rem;"></i>
+            </div>
+            <h3 class="fw-bold mb-3">All Caught Up!</h3>
+            <p class="text-muted mb-4">There are no pending account approvals at this time.</p>
+            <a href="{% url 'admin_dashboard' %}" class="btn btn-primary">
+                <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+            </a>
+        </div>
+        {% else %}
+        <!-- Filter Tabs -->
+        <ul class="nav nav-pills mb-4" data-aos="fade-up">
+            <li class="nav-item">
+                <a class="nav-link active" data-bs-toggle="pill" href="#all">
+                    All <span class="badge bg-primary ms-1">{{ total_pending }}</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" data-bs-toggle="pill" href="#doctors">
+                    Doctors <span class="badge bg-secondary ms-1">{{ pending_doctors.count }}</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" data-bs-toggle="pill" href="#nurses">
+                    Nurses <span class="badge bg-secondary ms-1">{{ pending_nurses.count }}</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" data-bs-toggle="pill" href="#patients">
+                    Patients <span class="badge bg-secondary ms-1">{{ pending_patients.count }}</span>
+                </a>
+            </li>
+        </ul>
+
+        <!-- Tab Content -->
+        <div class="tab-content">
+            <!-- All Pending -->
+            <div class="tab-pane fade show active" id="all">
+                {% include 'after_login/partials/pending_accounts_table.html' with accounts=pending_users %}
+            </div>
+
+            <!-- Doctors -->
+            <div class="tab-pane fade" id="doctors">
+                {% include 'after_login/partials/pending_accounts_table.html' with accounts=pending_doctors %}
+            </div>
+
+            <!-- Nurses -->
+            <div class="tab-pane fade" id="nurses">
+                {% include 'after_login/partials/pending_accounts_table.html' with accounts=pending_nurses %}
+            </div>
+
+            <!-- Patients -->
+            <div class="tab-pane fade" id="patients">
+                {% include 'after_login/partials/pending_accounts_table.html' with accounts=pending_patients %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+<!-- Approve Confirmation Modal -->
+<div class="modal fade" id="approveModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-check-circle me-2"></i>Confirm Account Approval
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to approve this account?</p>
+                <p class="mb-0"><strong>User:</strong> <span id="approve-username"></span></p>
+                <p class="mb-0"><strong>Role:</strong> <span id="approve-role"></span></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form method="post" id="approve-form" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-check me-1"></i>Approve Account
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Reject Confirmation Modal -->
+<div class="modal fade" id="rejectModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-times-circle me-2"></i>Confirm Account Rejection
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <strong>Warning:</strong> This action cannot be undone. The account will be permanently deleted.
+                </div>
+                <p>Are you sure you want to reject and delete this account?</p>
+                <p class="mb-0"><strong>User:</strong> <span id="reject-username"></span></p>
+                <p class="mb-0"><strong>Role:</strong> <span id="reject-role"></span></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form method="post" id="reject-form" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash me-1"></i>Reject & Delete
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Handle approve modal
+document.querySelectorAll('[data-approve-id]').forEach(btn => {
+    btn.addEventListener('click', function() {
+        const userId = this.dataset.approveId;
+        const username = this.dataset.approveUsername;
+        const role = this.dataset.approveRole;
+        
+        document.getElementById('approve-username').textContent = username;
+        document.getElementById('approve-role').textContent = role;
+        document.getElementById('approve-form').action = `/admin_approve_account/${userId}/`;
+    });
+});
+
+// Handle reject modal
+document.querySelectorAll('[data-reject-id]').forEach(btn => {
+    btn.addEventListener('click', function() {
+        const userId = this.dataset.rejectId;
+        const username = this.dataset.rejectUsername;
+        const role = this.dataset.rejectRole;
+        
+        document.getElementById('reject-username').textContent = username;
+        document.getElementById('reject-role').textContent = role;
+        document.getElementById('reject-form').action = `/admin_reject_account/${userId}/`;
+    });
+});
+</script>
+{% endblock %}
