@@ -1269,11 +1269,6 @@ def _process_ai_classification(request, classifier_type: ClassifierType, templat
                         'overall_quality': qa.overall_quality.value,
                         'quality_score': f"{avg_quality * 100:.0f}%",
                         'brightness_score': f"{qa.brightness_score * 100:.0f}%",
-                        'contrast_score': f"{qa.contrast_score * 100:.0f}%",
-                        'sharpness_score': f"{qa.sharpness_score * 100:.0f}%",
-                        'noise_score': f"{qa.noise_score * 100:.0f}%",
-                        'is_acceptable': qa.is_usable,
-                        'issues': qa.issues,
                     }
                 })
             

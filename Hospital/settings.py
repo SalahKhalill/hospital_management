@@ -30,7 +30,7 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'dev-secret-key-change-in-production')
 # Set DJANGOAPPMODE=Production in production environment
 DEBUG = os.environ.get('DJANGOAPPMODE') != 'Production'
 
-ALLOWED_HOSTS = ["localhost", "127.0.0.1", ]
+ALLOWED_HOSTS = ["localhost", "127.0.0.1", "0.0.0.0", "*"]
 
 
 
