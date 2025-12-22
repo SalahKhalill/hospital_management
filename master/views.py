@@ -67,15 +67,16 @@ def login_view(request, hospital_user):
             user = authenticate(username=username, password=password)
             if user is not None:
                 # Check if account is approved (skip check for superusers)
-                if not user.is_approved and not user.is_superuser:
-                    messages.warning(request, f"Your account is not approved yet. Please wait for approval or contact admin.")
-                    return redirect('home')
-                
+                if not user.is_approved:
+                    if not user.is_superuser:
+                        messages.warning(request, f"Your account is not approved yet. Please wait for approval or contact admin.")
+                        return redirect('home')
+
                 # Check if password change is required
                 if user.password_change_required:
                     login(request, user)
                     return redirect('force_password_change')
-                
+
                 if is_admin(user):
                     if user.is_staff:
                         login(request, user)
@@ -98,7 +99,7 @@ def login_view(request, hospital_user):
             messages.warning(request, f"Invalid username or password.")
     elif request.method == "GET":
         login_form = AuthenticationForm()
-    return render(request, 'new_login.html', {"login_form":login_form, "hospital_user":hospital_user})
+    return render(request, 'new_login.html', {"login_form": login_form, "hospital_user": hospital_user})
 
 
 
