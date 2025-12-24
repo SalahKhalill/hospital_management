@@ -18,7 +18,6 @@ class User(AbstractUser):
         NURSE = 'NURSE', 'Nurse'
         PATIENT = 'PATIENT', 'Patient'
     
-    # id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
     role = models.CharField(max_length=10, choices=Role.choices, default=Role.ADMIN)
     is_approved = models.BooleanField(default=False, verbose_name="Account Approved")
     created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
@@ -38,13 +37,10 @@ class Department(models.Model):
     description = models.TextField(verbose_name="Department Description")
     head_of_department = models.ForeignKey('Doctor', on_delete=models.CASCADE, null=True, blank=True, related_name='departments_headed')
     department_pic= models.ImageField(default='departments/default/logo.jpg', upload_to=department_directory_path)
-    #for return all doctors in department
     def doctors(self):
         return Doctor.objects.filter(department=self)
-    #for return all nurses in department
     def nurses(self):
         return Nurse.objects.filter(department=self)
-    #for return all medicines in department
     def medicines(self):
         return Medicine.objects.filter(department=self)
     def __str__(self):
@@ -117,7 +113,6 @@ class Patient(HospitalUser):
 
 
 
-# remove user location if delete the user
 @receiver(post_delete, sender=Doctor)
 def delete_doctor_location(sender, instance, *args, **kwargs):
     if instance.location:
@@ -186,10 +181,7 @@ class PatientDischargeDetails(models.Model):
         return f"{self.appointment} -- Total Payment: {self.total}"
 
 
-# User Signals
 
-# Create user profile if create user 
-# update user role if update
 @receiver(post_save, sender=User)
 def create_user_model(sender, instance, created, **kwargs):
     if created:

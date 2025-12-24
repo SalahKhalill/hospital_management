@@ -30,7 +30,6 @@ logger = logging.getLogger(__name__)
 
 
 
-#custom the UserCreationForm to update the auth user in it
 class CustomUserCreationForm(UserCreationForm):
     email = forms.EmailField(required=True, help_text='Required. Enter a valid email address.')
     
@@ -47,7 +46,6 @@ def home_view(request):
     return render(request, 'new_home.html', {'departments':departments})
 
 
-#-----------for checking user is doctor , patient or admin(by submit)
 def is_admin(user):
     return True if user.role =='ADMIN' else False
 def is_doctor(user):
@@ -66,13 +64,11 @@ def login_view(request, hospital_user):
             password = login_form.cleaned_data.get('password')
             user = authenticate(username=username, password=password)
             if user is not None:
-                # Check if account is approved (skip check for superusers)
                 if not user.is_approved:
                     if not user.is_superuser:
                         messages.warning(request, f"Your account is not approved yet. Please wait for approval or contact admin.")
                         return redirect('home')
 
-                # Check if password change is required
                 if user.password_change_required:
                     login(request, user)
                     return redirect('force_password_change')
@@ -116,7 +112,6 @@ def register_view(request):
         if register_form.is_valid():
             user = register_form.save(commit=False)
             user.role = 'PATIENT'  # Always create as patient
-            user.is_active = False
             user.save()
             user.refresh_from_db()
             messages.success(request, f"Your data has been registered successfully. You can log in as {user.username} after admin approval.")
@@ -204,7 +199,6 @@ class UserProfileView(View):
             profile_form = PatientForm(request.POST, request.FILES, instance=request.user.patient)
             location_form = LocationForm(request.POST, instance=request.user.patient.location)
         
-        # For admin users who only have user_form
         if profile_form is None or location_form is None:
             if user_form.is_valid():
                 user_form.save()
@@ -255,14 +249,13 @@ def force_password_change_view(request):
             user.password_change_required = False
             user.temp_password = None
             user.save()
-            update_session_auth_hash(request, user)  # Keep user logged in
+            update_session_auth_hash(request, user)  
             messages.success(request, "Password changed successfully! You can now access your account.")
             return redirect('after_login')
         else:
             messages.error(request, 'Error changing password. Please try again.')
     else:
         password_form = PasswordChangeForm(user=request.user)
-        # Show temporary password if available
         temp_pass_msg = f" Your temporary password was: {request.user.temp_password}" if request.user.temp_password else ""
     
     return render(request, 'after_login/force_password_change.html', {
@@ -274,19 +267,17 @@ def force_password_change_view(request):
 
 
 
-#---------------------------------------------------------------------------------
-#------------------------ ADMIN RELATED VIEWS START ------------------------------
-#---------------------------------------------------------------------------------
+
+#-- ADMIN RELATED VIEWS START 
+
 @login_required()
 @user_passes_test(is_admin)
 def admin_dashboard_view(request):
-    #for both table in admin dashboard
     doctors=Doctor.objects.all().order_by('-id')
     departments=Department.objects.all().order_by('-id')
     medicines=Medicine.objects.all().order_by('-id')
     nurses=Nurse.objects.all().order_by('-id')
     patients=Patient.objects.all().order_by('-id')
-    #for three cards
     doctorcount=Doctor.objects.all().filter(user__is_active=True).count()
     pendingdoctorcount=Doctor.objects.all().filter(user__is_active=False).count()
     
@@ -370,7 +361,6 @@ def admin_delete_user_view(request, id):
     role = user.role
     
     try:
-        # If deleting a doctor, first unassign them from all patients
         if role == 'DOCTOR' and hasattr(user, 'doctor'):
             Patient.objects.filter(assigned_doctor=user.doctor).update(assigned_doctor=None)
         
@@ -594,13 +584,12 @@ def admin_approve_account_view(request, user_id):
         
         messages.success(request, f"Account for {user.get_full_name() or user.username} ({user.role}) has been approved successfully.")
         
-        # Send email notification if email exists
         if user.email:
             try:
                 send_mail(
                     subject='Account Approved - Hospital Management System',
                     message=f'Dear {user.get_full_name() or user.username},\n\nYour account has been approved by the administrator. You can now log in to the system.\n\nUsername: {user.username}\n\nThank you.',
-                    from_email=None,  # Will use DEFAULT_FROM_EMAIL from settings
+                    from_email=None,  
                     recipient_list=[user.email],
                     fail_silently=True,
                 )
@@ -650,7 +639,6 @@ class AdminUpdateUserView(View):
         if is_doctor(user):
             form = AdminDoctorForm(request.POST, instance=user.doctor)
             if form.is_valid():
-                # Handle password change if provided
                 new_password = form.cleaned_data.get('new_password')
                 if new_password:
                     user.set_password(new_password)
@@ -660,7 +648,6 @@ class AdminUpdateUserView(View):
         elif is_nurse(user):
             form = AdminNurseForm(request.POST, instance=user.nurse)
             if form.is_valid():
-                # Handle password change if provided
                 new_password = form.cleaned_data.get('new_password')
                 if new_password:
                     user.set_password(new_password)
@@ -670,7 +657,6 @@ class AdminUpdateUserView(View):
         elif is_patient(user):
             form = PatientForm(request.POST, request.FILES, instance=user.patient)
             if form.is_valid():
-                # Handle password change if provided
                 new_password = form.cleaned_data.get('new_password')
                 if new_password:
                     user.set_password(new_password)
@@ -802,7 +788,6 @@ def admin_delete_appointment_view(request, id):
 @user_passes_test(is_admin)
 def admin_discharge_patient_view(request, id):
     appointment = Appointment.objects.get(id=id)
-    # Get or create discharge details for this appointment
     discharge_details, created = PatientDischargeDetails.objects.get_or_create(
         appointment=appointment,
         defaults={
@@ -857,7 +842,6 @@ def render_to_pdf(template_src, context_dict):
     template = get_template(template_src)
     html = template.render(context_dict)
     result = io.BytesIO()
-    # تحويل صفحة HTML إلى ملف PDF باستخدام pisa
     pdf = pisa.pisaDocument(io.BytesIO(html.encode("UTF-8")), result, encoding="UTF-8")
     if not pdf.err:
         return result.getvalue()
@@ -873,10 +857,8 @@ def download_permit_pdf(request, id):
     if pdf:
         response = HttpResponse(pdf, content_type='application/pdf')
         response['Content-Disposition'] = 'attachment; filename="permit.pdf"'
-        # response.write(pdf_content)
         return response
 
-    # If there is an error generating the PDF, you can handle it here
     return HttpResponse('Error generating PDF', status=500)
 
 
@@ -895,9 +877,9 @@ def department_view(request, id):
 
 
 
-#---------------------------------------------------------------------------------
-#------------------------ DOCTOR RELATED VIEWS START ------------------------------
-#---------------------------------------------------------------------------------
+
+#--DOCTOR RELATED VIEWS START 
+
 @login_required
 @user_passes_test(is_doctor)
 def doctor_dashboard_view(request):
@@ -954,9 +936,9 @@ def doctor_report_view(request, id):
 
 
 
-#---------------------------------------------------------------------------------
-#------------------------ NURSE RELATED VIEWS START ------------------------------
-#---------------------------------------------------------------------------------
+
+#--NURSE RELATED VIEWS START
+
 @login_required
 @user_passes_test(is_nurse)
 def nurse_dashboard_view(request):
@@ -994,9 +976,8 @@ def nurse_appointment_view(request):
 
 
 
-#---------------------------------------------------------------------------------
-#------------------------ PATIENT RELATED VIEWS START ------------------------------
-#---------------------------------------------------------------------------------
+#-- PATIENT RELATED VIEWS START 
+
 @login_required
 @user_passes_test(is_patient)
 def patient_dashboard_view(request):

@@ -1,25 +1,4 @@
-"""
-Advanced Medical Classifier Module for Medical Image Analysis
-=========================================================
-
-Enterprise-grade medical image classification with comprehensive features:
-
-Core Features:
-- Lazy model loading for fast startup
-- Advanced image preprocessing pipeline
-- Test-Time Augmentation (TTA) for robust predictions
-- Confidence thresholds with uncertainty quantification
-- Grad-CAM heatmap visualization for explainability
-
-Advanced Features:
-- Image quality assessment
-- Automatic region of interest detection
-- Multi-scale analysis
-- Prediction caching for performance
-- Detailed medical context and recommendations
-- Inference time tracking
-- Comprehensive result serialization
-"""
+ 
 import numpy as np
 import cv2
 import os
@@ -38,7 +17,6 @@ from tensorflow.keras.applications.vgg16 import preprocess_input
 
 logger = logging.getLogger(__name__)
 
-# Import brain_classifier for specialized preprocessing
 try:
     from master import brain_classifier
     BRAIN_CLASSIFIER_AVAILABLE = True
@@ -47,9 +25,6 @@ except ImportError:
     logger.warning("brain_classifier module not available")
 
 
-# ============================================================================
-# ENUMS AND DATA CLASSES
-# ============================================================================
 
 class ClassifierType(Enum):
     BRAIN = "brain"
@@ -57,7 +32,6 @@ class ClassifierType(Enum):
 
 
 class Severity(Enum):
-    """Medical severity levels for classification results."""
     NORMAL = "normal"
     LOW = "low"
     MODERATE = "moderate"
@@ -66,7 +40,6 @@ class Severity(Enum):
     
     @property
     def priority(self) -> int:
-        """Get numeric priority for sorting."""
         return {
             Severity.NORMAL: 0,
             Severity.LOW: 1,
@@ -77,7 +50,6 @@ class Severity(Enum):
 
 
 class ImageQuality(Enum):
-    """Image quality assessment results."""
     EXCELLENT = "excellent"
     GOOD = "good"
     FAIR = "fair"
@@ -87,15 +59,13 @@ class ImageQuality(Enum):
 
 @dataclass
 class QualityAssessment:
-    """Detailed image quality analysis."""
     overall_quality: ImageQuality
-    brightness_score: float  # 0-1, 0.5 is ideal
-    contrast_score: float    # 0-1, higher is better
-    sharpness_score: float   # 0-1, higher is better
-    noise_score: float       # 0-1, lower noise is better
+    brightness_score: float
+    contrast_score: float
+    sharpness_score: float
+    noise_score: float
     issues: List[str]
     suggestions: List[str]
-    
     @property
     def is_usable(self) -> bool:
         return self.overall_quality != ImageQuality.UNUSABLE
@@ -103,7 +73,6 @@ class QualityAssessment:
 
 @dataclass
 class PredictionDetail:
-    """Individual prediction with class and probability."""
     class_name: str
     probability: float
     severity: Severity
@@ -115,42 +84,26 @@ class PredictionDetail:
 
 @dataclass
 class ClassificationResult:
-    """Comprehensive result from image classification."""
-    # Core results
     class_index: int
     class_name: str
     confidence: float
     severity: Severity
     is_confident: bool
-    
-    # Detailed predictions
     top_predictions: List[PredictionDetail]
     all_probabilities: List[float]
-    
-    # Medical context
     recommendations: List[str]
     medical_info: Dict[str, str]
     urgency_level: str
-    
-    # Technical details
     preprocessing_applied: List[str] = field(default_factory=list)
     inference_time_ms: float = 0.0
     model_version: str = "1.0"
     tta_enabled: bool = False
-    
-    # Visualizations
     heatmap_base64: Optional[str] = None
     roi_base64: Optional[str] = None
-    
-    # Quality assessment
     quality_assessment: Optional[QualityAssessment] = None
-    
-    # Metadata
     timestamp: str = field(default_factory=lambda: datetime.now().isoformat())
     image_hash: str = ""
-    
     def to_dict(self) -> Dict[str, Any]:
-        """Convert result to dictionary for JSON serialization."""
         return {
             'class_index': self.class_index,
             'class_name': self.class_name,
@@ -181,9 +134,7 @@ class ClassificationResult:
             'quality': self.quality_assessment.overall_quality.value if self.quality_assessment else None,
             'timestamp': self.timestamp,
         }
-    
     def get_summary(self) -> str:
-        """Get a human-readable summary."""
         return (
             f"Diagnosis: {self.class_name} ({self.confidence*100:.1f}% confidence)\n"
             f"Severity: {self.severity.value.upper()}\n"
@@ -192,33 +143,17 @@ class ClassificationResult:
         )
 
 
-# ============================================================================
-# EXCEPTIONS
-# ============================================================================
-
 class ModelNotFoundError(Exception):
-    """Raised when a model file cannot be found."""
     pass
-
-
 class ClassificationError(Exception):
-    """Raised when classification fails."""
     pass
-
-
 class ImageValidationError(Exception):
-    """Raised when image validation fails."""
     pass
-
-
 class ImageQualityError(Exception):
-    """Raised when image quality is too poor for analysis."""
     pass
 
 
-# ============================================================================
-# CLASSIFIER CONFIGURATION
-# ============================================================================
+ 
 
 CLASSIFIER_CONFIG = {
     ClassifierType.BRAIN: {
@@ -228,8 +163,8 @@ CLASSIFIER_CONFIG = {
         ],
         'is_binary': True,
         'severity_mapping': {
-            0: Severity.NORMAL,    # no tumor
-            1: Severity.CRITICAL,  # tumor detected
+            0: Severity.NORMAL,
+            1: Severity.CRITICAL,
         },
         'urgency_mapping': {
             0: "Continue regular health monitoring",
@@ -306,9 +241,7 @@ CLASSIFIER_CONFIG = {
 }
 
 
-# ============================================================================
-# IMAGE QUALITY ASSESSMENT
-# ============================================================================
+
 
 class ImageQualityAnalyzer:
     """Comprehensive image quality analysis for medical images."""
@@ -321,7 +254,6 @@ class ImageQualityAnalyzer:
         else:
             gray = image
         mean_brightness = np.mean(gray) / 255.0
-        # Convert to score where 0.5 (middle brightness) is best
         return 1.0 - abs(mean_brightness - 0.5) * 2
     
     @staticmethod
@@ -332,7 +264,6 @@ class ImageQualityAnalyzer:
         else:
             gray = image
         std = np.std(gray)
-        # Normalize to 0-1 range (std of 50+ is good contrast)
         return min(std / 50.0, 1.0)
     
     @staticmethod
@@ -343,7 +274,6 @@ class ImageQualityAnalyzer:
         else:
             gray = image
         laplacian_var = cv2.Laplacian(gray, cv2.CV_64F).var()
-        # Normalize to 0-1 range (variance of 100+ is sharp)
         return min(laplacian_var / 100.0, 1.0)
     
     @staticmethod
@@ -354,12 +284,10 @@ class ImageQualityAnalyzer:
         else:
             gray = image
         
-        # Use high-pass filter to estimate noise
         blur = cv2.GaussianBlur(gray, (5, 5), 0)
         noise = np.abs(gray.astype(float) - blur.astype(float))
         noise_level = np.mean(noise)
         
-        # Lower noise is better, normalize inversely
         return max(0, 1.0 - noise_level / 20.0)
     
     @classmethod
@@ -373,7 +301,6 @@ class ImageQualityAnalyzer:
         issues = []
         suggestions = []
         
-        # Analyze each metric
         if brightness < 0.3:
             issues.append("Image is too dark or too bright")
             suggestions.append("Ensure proper lighting when capturing the image")
@@ -390,10 +317,8 @@ class ImageQualityAnalyzer:
             issues.append("High noise level detected")
             suggestions.append("Use better lighting to reduce noise")
         
-        # Calculate overall score
         overall_score = (brightness * 0.2 + contrast * 0.3 + sharpness * 0.35 + noise * 0.15)
         
-        # Determine quality level
         if overall_score >= 0.8:
             quality = ImageQuality.EXCELLENT
         elif overall_score >= 0.6:
@@ -419,9 +344,6 @@ class ImageQualityAnalyzer:
         )
 
 
-# ============================================================================
-# IMAGE PREPROCESSING
-# ============================================================================
 
 class ImagePreprocessor:
     """Advanced image preprocessing for medical images."""
@@ -490,20 +412,16 @@ class ImagePreprocessor:
         else:
             gray = image.copy()
         
-        # Apply threshold to find main content
         _, thresh = cv2.threshold(gray, 10, 255, cv2.THRESH_BINARY)
         
-        # Find contours
         contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         
         if not contours:
             return image, (0, 0, image.shape[1], image.shape[0])
         
-        # Get bounding box of largest contour
         largest = max(contours, key=cv2.contourArea)
         x, y, w, h = cv2.boundingRect(largest)
         
-        # Add padding
         padding = 10
         x = max(0, x - padding)
         y = max(0, y - padding)
@@ -540,9 +458,6 @@ class ImagePreprocessor:
         return processed, applied
 
 
-# ============================================================================
-# TEST-TIME AUGMENTATION
-# ============================================================================
 
 class TestTimeAugmentation:
     """Apply test-time augmentation for more robust predictions."""
@@ -561,7 +476,7 @@ class TestTimeAugmentation:
                 augmented = cv2.rotate(augmented, cv2.ROTATE_90_COUNTERCLOCKWISE)
         
         if flip:
-            augmented = cv2.flip(augmented, 1)  # Horizontal flip
+            augmented = cv2.flip(augmented, 1) 
         
         return augmented
     
@@ -582,25 +497,19 @@ class TestTimeAugmentation:
         
         for rotation in rotations:
             for flip in flips:
-                # Augment image
                 augmented = cls.augment_image(image, rotation, flip)
                 
-                # Resize and prepare
                 resized = cv2.resize(augmented, dsize=input_shape)
                 img_expanded = np.expand_dims(resized, axis=0).astype(np.float32)
                 img_normalized = img_expanded / 255.0
                 
-                # Predict
                 pred = model.predict(img_normalized, verbose=0)
                 all_predictions.append(pred[0])
         
-        # Average predictions
         return np.mean(all_predictions, axis=0)
 
 
-# ============================================================================
-# GRAD-CAM VISUALIZATION
-# ============================================================================
+
 
 class GradCAMGenerator:
     """Generate Grad-CAM heatmaps for model interpretability."""

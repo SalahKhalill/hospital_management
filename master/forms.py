@@ -12,7 +12,6 @@ class LocationForm(forms.ModelForm):
         model = Location
         fields = "__all__"
 
-#for user signup
 class UserForm(forms.ModelForm):
     username = forms.CharField(disabled=True)
     class Meta:
@@ -106,9 +105,6 @@ class AdminNurseForm(forms.ModelForm):
 
 
 class PatientForm(forms.ModelForm):
-    #this is the extrafield for linking patient and their assigend doctor
-    #this will show dropdown __str__ method doctor model is shown on html so override it
-    #to_field_name this will fetch corresponding value  user_id present in Doctor model and return it
     profile_pic = forms.ImageField(widget=CustomImageFieldWidget)
     new_password = forms.CharField(
         required=False,
@@ -128,7 +124,6 @@ class AppointmentForm(forms.ModelForm):
 
 
 
-#for departments page
 class DepartmentForm(forms.ModelForm):
     department_pic = forms.ImageField(widget=CustomImageFieldWidget)
     class Meta:
@@ -138,7 +133,6 @@ class DepartmentForm(forms.ModelForm):
 
 
 
-#for medicines page
 class MedicineForm(forms.ModelForm):
     class Meta:
         model=Medicine

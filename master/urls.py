@@ -9,7 +9,7 @@ urlpatterns = [
     path("<str:hospital_user>/login/", views.login_view, name='login'),
     path('logout/', views.logout_view, name='logout'),
     path('after_login/', views.after_login_view, name='after_login'),
-    path('register/', views.register_view, name='register'),  # Only patient registration
+    path('register/', views.register_view, name='register'),
     
     path('admin_profile/', views.AdminProfileView.as_view(), name='admin_profile'),
     path('user_profile/', views.UserProfileView.as_view(), name='user_profile'),
@@ -78,11 +78,9 @@ urlpatterns = [
     path('send_mail/<int:id>/', views.send_mail_view, name='send_mail'),
 
 
-    #---------FOR AI RELATED URLS-------------------------------------
     path('bones_classifier/', views.bones_detect_view, name='bones_classifier'),
     path('brain_classifier/', views.brain_detect_view, name='brain_classifier'),
     
-    # AI API endpoints
     path('api/ai/classify/', views.ai_classify_api, name='ai_classify_api'),
     path('api/ai/models/status/', views.ai_models_status_api, name='ai_models_status'),
 
