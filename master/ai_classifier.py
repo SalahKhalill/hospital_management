@@ -1,4 +1,25 @@
- 
+"""
+Advanced Medical Classifier Module for Medical Image Analysis
+=========================================================
+
+Enterprise-grade medical image classification with comprehensive features:
+
+Core Features:
+- Lazy model loading for fast startup
+- Advanced image preprocessing pipeline
+- Test-Time Augmentation (TTA) for robust predictions
+- Confidence thresholds with uncertainty quantification
+- Grad-CAM heatmap visualization for explainability
+
+Advanced Features:
+- Image quality assessment
+- Automatic region of interest detection
+- Multi-scale analysis
+- Prediction caching for performance
+- Detailed medical context and recommendations
+- Inference time tracking
+- Comprehensive result serialization
+"""
 import numpy as np
 import cv2
 import os

@@ -78,6 +78,7 @@ urlpatterns = [
     path('send_mail/<int:id>/', views.send_mail_view, name='send_mail'),
 
 
+    #---------FOR AI RELATED URLS------------------------------------
     path('bones_classifier/', views.bones_detect_view, name='bones_classifier'),
     path('brain_classifier/', views.brain_detect_view, name='brain_classifier'),
     

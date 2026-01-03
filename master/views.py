@@ -584,12 +584,13 @@ def admin_approve_account_view(request, user_id):
         
         messages.success(request, f"Account for {user.get_full_name() or user.username} ({user.role}) has been approved successfully.")
         
+        # Send email notification if email exists
         if user.email:
             try:
                 send_mail(
                     subject='Account Approved - Hospital Management System',
                     message=f'Dear {user.get_full_name() or user.username},\n\nYour account has been approved by the administrator. You can now log in to the system.\n\nUsername: {user.username}\n\nThank you.',
-                    from_email=None,  
+                    from_email=None,  # Will use DEFAULT_FROM_EMAIL from settings
                     recipient_list=[user.email],
                     fail_silently=True,
                 )

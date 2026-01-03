@@ -1,18 +1,18 @@
-# 🏥 Hospital Management System
+# Hospital Management System
 
 A comprehensive hospital management system built with Django, featuring deep learning-powered medical image classification for brain tumors and bone fractures.
 
-## ✨ Features
+## Features
 
 - **User Management**: Multi-role system (Admin, Doctor, Nurse, Patient)
 - **Appointment System**: Schedule and manage patient appointments
 - **Department Management**: Organize hospital departments and staff
 - **Medicine Inventory**: Track and manage medicine stock
 - **Medical Diagnostics**: Image classification for:
-  - 🧠 Brain tumor detection (MRI scans)
-  - 🦴 Bone fracture detection (X-rays)
+   - Brain tumor detection (MRI scans)
+   - Bone fracture detection (X-rays)
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Prerequisites
 
@@ -52,9 +52,6 @@ A comprehensive hospital management system built with Django, featuring deep lea
    # Edit .env with your settings (generate a new SECRET_KEY!)
    ```
 
-<<<<<<< HEAD
-5. **Run migrations**
-=======
 5. **Download AI Models**
    
    Download the model files from Google Drive (links in `AI Models drive links.txt`) and place them in the `models/` folder:
@@ -63,38 +60,25 @@ A comprehensive hospital management system built with Django, featuring deep lea
    - `xray.h5` - Bone fracture classifier
 
 6. **Run migrations**
->>>>>>> origin/main
    ```bash
    python manage.py migrate
    ```
 
-<<<<<<< HEAD
-6. **Create a superuser**
-=======
 7. **Create a superuser**
->>>>>>> origin/main
    ```bash
    python manage.py createsuperuser
    ```
 
-<<<<<<< HEAD
-7. **Run the development server**
-=======
 8. **Run the development server**
->>>>>>> origin/main
    ```bash
    python manage.py runserver
    ```
 
-<<<<<<< HEAD
-8. **Access the application"
-=======
 9. **Access the application**
->>>>>>> origin/main
    - Main site: http://127.0.0.1:8000
    - Admin panel: http://127.0.0.1:8000/admin
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 hospital_management/
@@ -103,21 +87,13 @@ hospital_management/
 │   ├── urls.py
 │   └── wsgi.py
 ├── master/                 # Main application
-<<<<<<< HEAD
-│   ├── ai_classifier.py    # Unified medical classification module
-=======
 │   ├── ai_classifier.py    # Unified AI classification module
->>>>>>> origin/main
 │   ├── models.py           # Database models
 │   ├── views.py            # View functions
 │   ├── forms.py            # Django forms
 │   ├── templates/          # HTML templates
 │   └── static/             # CSS, JS, images
-<<<<<<< HEAD
-├── models/                 # Model files (.h5)
-=======
 ├── models/                 # AI model files (.h5)
->>>>>>> origin/main
 ├── media/                  # User uploaded files
 ├── logs/                   # Application logs
 ├── requirements.txt
@@ -125,7 +101,7 @@ hospital_management/
 └── manage.py
 ```
 
-## 🔐 Security Features
+## Security Features
 
 - Secure session cookies (HTTPS in production)
 - CSRF protection on all forms
@@ -134,24 +110,12 @@ hospital_management/
 - Argon2 password hashing
 - Environment-based configuration
 
-<<<<<<< HEAD
-## 🤖 Classification Models
-=======
-## 🤖 AI Models
->>>>>>> origin/main
+## AI Models
 
 The system uses TensorFlow/Keras models for medical image classification:
 
 | Model | Purpose | Classes |
 |-------|---------|---------|
-<<<<<<< HEAD
-| brain.h5 | Brain MRI analysis | No Tumor, Tumor Detected |
-| xray.h5 | Bone X-ray analysis | No Fracture, Fractured |
-
-**Note**: Models are loaded lazily to improve startup time.
-- **Image Quality Assessment**: Automatic evaluation of brightness, contrast, sharpness, and noise
-- **Grad-CAM Visualization**: Heatmaps showing which regions influenced the classification decision
-=======
 | brain.h5 | Brain MRI analysis | No Tumor, Stable Tumor, Unstable Tumor |
 | skin.h5 | Skin condition detection | 9 skin conditions including melanoma |
 | xray.h5 | Bone X-ray analysis | No Fracture, Fractured |
@@ -163,29 +127,20 @@ The system uses TensorFlow/Keras models for medical image classification:
 - **Test-Time Augmentation (TTA)**: Multiple augmented predictions for more robust results
 - **Image Quality Assessment**: Automatic evaluation of brightness, contrast, sharpness, and noise
 - **Grad-CAM Visualization**: Heatmaps showing which regions influenced the AI decision
->>>>>>> origin/main
 - **Severity Classification**: Automatic urgency and severity assessment
 - **Comprehensive Recommendations**: Medical guidance based on detected conditions
 
-## 🔌 REST API
+## REST API
 
 ### Classification Endpoint
 
 `POST /api/ai/classify/`
 
-<<<<<<< HEAD
-Classify medical images using deep learning models.
-
-**Parameters:**
-- `image` (file, required): The image file to classify
-- `classifier` (string, required): One of `brain`, `bones`
-=======
 Classify medical images using AI models.
 
 **Parameters:**
 - `image` (file, required): The image file to classify
 - `classifier` (string, required): One of `skin`, `brain`, `bones`
->>>>>>> origin/main
 - `generate_heatmap` (string, optional): `true` to generate Grad-CAM heatmap
 - `use_tta` (string, optional): `true` to use test-time augmentation
 - `assess_quality` (string, optional): `true` to assess image quality (default: true)
@@ -194,24 +149,14 @@ Classify medical images using AI models.
 ```json
 {
   "success": true,
-<<<<<<< HEAD
-  "classifier": "brain",
-  "result": {
-    "class_name": "Tumor Detected",
-=======
   "classifier": "skin",
   "result": {
     "class_name": "Melanoma",
->>>>>>> origin/main
     "confidence": 0.92,
     "is_confident": true,
     "severity": "critical",
     "urgency": "Immediate attention required",
-<<<<<<< HEAD
-    "description": "Brain tumor detected..."
-=======
     "description": "Malignant skin cancer..."
->>>>>>> origin/main
   },
   "top_predictions": [...],
   "recommendations": [...],
@@ -222,45 +167,32 @@ Classify medical images using AI models.
 
 ### Models Status Endpoint
 
-<<<<<<< HEAD
-`GET /api/models/status/`
-
-Check the status of all classification models.
-=======
 `GET /api/ai/models/status/`
 
 Check the status of all AI models.
->>>>>>> origin/main
 
 **Example Response:**
 ```json
 {
   "success": true,
   "models_status": {
-<<<<<<< HEAD
-=======
     "skin": {"available": true, "path": "..."},
->>>>>>> origin/main
     "brain": {"available": true, "path": "..."},
     "bones": {"available": true, "path": "..."}
   }
 }
 ```
 
-## 👥 User Roles
+## User Roles
 
 | Role | Capabilities |
 |------|-------------|
 | **Admin** | Full system access, user management, reports |
-<<<<<<< HEAD
-| **Doctor** | Patient management, appointments, medical diagnostics |
-=======
 | **Doctor** | Patient management, appointments, AI diagnostics |
->>>>>>> origin/main
 | **Nurse** | Patient care, appointment scheduling |
 | **Patient** | View appointments, medical records |
 
-## 🛠️ Development
+## Development
 
 ### Running Tests
 ```bash
@@ -270,7 +202,7 @@ python manage.py test
 ### Code Style
 Follow PEP 8 guidelines for Python code.
 
-## 📧 Email Configuration
+## Email Configuration
 
 For password reset and notifications, configure SMTP in `.env`:
 ```
@@ -280,7 +212,7 @@ EMAIL_HOST_PASSWORD=your-app-password
 
 For Gmail, use an [App Password](https://support.google.com/accounts/answer/185833).
 
-## 🤝 Contributing
+## Contributing
 
 1. Create a new branch: `git checkout -b feature/your-feature`
 2. Make your changes
@@ -288,14 +220,10 @@ For Gmail, use an [App Password](https://support.google.com/accounts/answer/1858
 4. Push: `git push origin feature/your-feature`
 5. Open a Pull Request
 
-## 📄 License
+## License
 
 This project is for educational purposes.
 
-## ⚠️ Disclaimer
+## Disclaimer
 
-<<<<<<< HEAD
-The diagnostic tools are for educational/demonstration purposes only and should **NOT** be used for actual medical diagnosis. Always consult qualified healthcare professionals.
-=======
 The AI diagnostic tools are for educational/demonstration purposes only and should **NOT** be used for actual medical diagnosis. Always consult qualified healthcare professionals.
->>>>>>> origin/main
