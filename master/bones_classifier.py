@@ -56,7 +56,6 @@ def classifier(path, model, shape) -> tuple:
     
     return idx, pred_probs
 
-# Load model with proper path
 model_path = os.path.join(settings.BASE_DIR, 'models', 'xray.h5')
 
 # Check if model exists

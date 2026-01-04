@@ -12,7 +12,6 @@ class LocationForm(forms.ModelForm):
         model = Location
         fields = "__all__"
 
-#for user signup
 class UserForm(forms.ModelForm):
     username = forms.CharField(disabled=True)
     class Meta:
@@ -22,16 +21,9 @@ class UserForm(forms.ModelForm):
 
 class DoctorForm(forms.ModelForm):
     profile_pic = forms.ImageField(widget=CustomImageFieldWidget)
-    department_name = forms.CharField(disabled=True, required=False, label="Department")
-    specialization = forms.CharField(disabled=True, required=False)
     class Meta:
         model=Doctor
-        fields= ("profile_pic", "department_name", "specialization")
-    
-    def __init__(self, *args, **kwargs):
-        super(DoctorForm, self).__init__(*args, **kwargs)
-        if self.instance.department:
-            self.fields['department_name'].initial = self.instance.department.name
+        fields= ("profile_pic", "department", "specialization")
         
 
         
@@ -41,6 +33,12 @@ class AdminDoctorForm(forms.ModelForm):
     last_name = forms.CharField(disabled=True,required=False)
     address = forms.CharField(disabled=True,required=False)
     email = forms.CharField(disabled=True,required=False)
+    new_password = forms.CharField(
+        required=False,
+        label='Password',
+        widget=forms.PasswordInput(attrs={'placeholder': '••••••••'}),
+        help_text='Enter a new password to change it, or leave blank to keep the current password.'
+    )
     class Meta:
         model=Doctor
         fields= ('username', 'first_name','last_name', "specialization", "department", "address", "email") 
@@ -81,6 +79,12 @@ class AdminNurseForm(forms.ModelForm):
     last_name = forms.CharField(disabled=True,required=False)
     address = forms.CharField(disabled=True,required=False)
     email = forms.CharField(disabled=True,required=False)
+    new_password = forms.CharField(
+        required=False,
+        label='Password',
+        widget=forms.PasswordInput(attrs={'placeholder': '••••••••'}),
+        help_text='Enter a new password to change it, or leave blank to keep the current password.'
+    )
     class Meta:
         model=Nurse
         fields= ('username', 'first_name','last_name', "shift_time", "department", "address", "email") 
@@ -101,10 +105,13 @@ class AdminNurseForm(forms.ModelForm):
 
 
 class PatientForm(forms.ModelForm):
-    #this is the extrafield for linking patient and their assigend doctor
-    #this will show dropdown __str__ method doctor model is shown on html so override it
-    #to_field_name this will fetch corresponding value  user_id present in Doctor model and return it
     profile_pic = forms.ImageField(widget=CustomImageFieldWidget)
+    new_password = forms.CharField(
+        required=False,
+        label='Password',
+        widget=forms.PasswordInput(attrs={'placeholder': '••••••••'}),
+        help_text='Enter a new password to change it, or leave blank to keep the current password.'
+    )
     class Meta:
         model=Patient
         fields=("profile_pic", "symptoms", "assigned_doctor")
@@ -117,7 +124,6 @@ class AppointmentForm(forms.ModelForm):
 
 
 
-#for departments page
 class DepartmentForm(forms.ModelForm):
     department_pic = forms.ImageField(widget=CustomImageFieldWidget)
     class Meta:
@@ -127,7 +133,6 @@ class DepartmentForm(forms.ModelForm):
 
 
 
-#for medicines page
 class MedicineForm(forms.ModelForm):
     class Meta:
         model=Medicine

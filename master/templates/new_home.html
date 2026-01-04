@@ -22,7 +22,7 @@
                 </p>
                 <div class="d-flex flex-wrap gap-3 mb-4">
                     {% if not user.is_authenticated %}
-                    <a href="{% url 'register' 'patient' %}" class="btn btn-light btn-lg px-4 py-3 fw-semibold shadow">
+                    <a href="{% url 'register' %}" class="btn btn-light btn-lg px-4 py-3 fw-semibold shadow">
                         <i class="fas fa-user-plus me-2"></i>Get Started Free
                     </a>
                     <a href="{% url 'login' 'patient' %}" class="btn btn-outline-light btn-lg px-4 py-3 fw-semibold">
@@ -451,7 +451,7 @@
                     <p class="lead mb-4 opacity-90">Join thousands of patients who trust MedCare for their healthcare needs</p>
                     <div class="d-flex flex-wrap justify-content-center gap-3">
                         {% if not user.is_authenticated %}
-                        <a href="{% url 'register' 'patient' %}" class="btn btn-light btn-lg px-5 py-3 fw-semibold shadow">
+                        <a href="{% url 'register' %}" class="btn btn-light btn-lg px-5 py-3 fw-semibold shadow">
                             <i class="fas fa-user-plus me-2"></i>Create Free Account
                         </a>
                         <a href="{% url 'contactus' %}" class="btn btn-outline-light btn-lg px-5 py-3 fw-semibold">

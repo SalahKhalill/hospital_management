@@ -6,7 +6,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse, JsonResponse
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm, UsernameField, PasswordChangeForm
 from django.contrib.auth.decorators import login_required, user_passes_test
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
 from django.utils.decorators import method_decorator
 from django.contrib import messages
 from django.views import View
@@ -30,11 +30,12 @@ logger = logging.getLogger(__name__)
 
 
 
-#custom the UserCreationForm to update the auth user in it
 class CustomUserCreationForm(UserCreationForm):
+    email = forms.EmailField(required=True, help_text='Required. Enter a valid email address.')
+    
     class Meta:
         model = User
-        fields = ("username", "first_name", "last_name")
+        fields = ("username", "first_name", "last_name", "email")
         field_classes = {"username": UsernameField}
 
 
@@ -45,7 +46,6 @@ def home_view(request):
     return render(request, 'new_home.html', {'departments':departments})
 
 
-#-----------for checking user is doctor , patient or admin(by submit)
 def is_admin(user):
     return True if user.role =='ADMIN' else False
 def is_doctor(user):
@@ -64,11 +64,15 @@ def login_view(request, hospital_user):
             password = login_form.cleaned_data.get('password')
             user = authenticate(username=username, password=password)
             if user is not None:
-                # Check if account is approved
                 if not user.is_approved:
-                    messages.warning(request, f"Your account is not approved yet. Please wait for approval or contact admin.")
-                    return redirect('home')
-                
+                    if not user.is_superuser:
+                        messages.warning(request, f"Your account is not approved yet. Please wait for approval or contact admin.")
+                        return redirect('home')
+
+                if user.password_change_required:
+                    login(request, user)
+                    return redirect('force_password_change')
+
                 if is_admin(user):
                     if user.is_staff:
                         login(request, user)
@@ -91,7 +95,7 @@ def login_view(request, hospital_user):
             messages.warning(request, f"Invalid username or password.")
     elif request.method == "GET":
         login_form = AuthenticationForm()
-    return render(request, 'new_login.html', {"login_form":login_form, "hospital_user":hospital_user})
+    return render(request, 'new_login.html', {"login_form": login_form, "hospital_user": hospital_user})
 
 
 
@@ -102,22 +106,21 @@ def logout_view(request):
     return redirect('home')
 
 
-def register_view(request, hospital_user):
+def register_view(request):
     if request.method == 'POST':
         register_form = CustomUserCreationForm(data=request.POST)
         if register_form.is_valid():
             user = register_form.save(commit=False)
-            user.role = hospital_user
-            user.is_active = False
+            user.role = 'PATIENT'  # Always create as patient
             user.save()
             user.refresh_from_db()
-            messages.success(request, f"Your data has been registered successfully. You can log in as {user.username} after confirming your account within 24 hours.")
+            messages.success(request, f"Your data has been registered successfully. You can log in as {user.username} after admin approval.")
             return redirect("home")
         else:
             messages.error(request, f"An error occured try again.")
     elif request.method == 'GET':
         register_form = CustomUserCreationForm()
-    return render(request, 'new_register.html', {'register_form':register_form, 'hospital_user':hospital_user})
+    return render(request, 'new_register.html', {'register_form':register_form, 'hospital_user':'patient'})
 
 
 
@@ -196,7 +199,6 @@ class UserProfileView(View):
             profile_form = PatientForm(request.POST, request.FILES, instance=request.user.patient)
             location_form = LocationForm(request.POST, instance=request.user.patient.location)
         
-        # For admin users who only have user_form
         if profile_form is None or location_form is None:
             if user_form.is_valid():
                 user_form.save()
@@ -234,22 +236,48 @@ def change_password_view(request):
     return render(request, 'after_login/new_change_password.html', {"password_form": password_form})
 
 
+@login_required
+def force_password_change_view(request):
+    """Force users to change their password on first login"""
+    if not request.user.password_change_required:
+        return redirect('after_login')
+    
+    if request.method == 'POST':
+        password_form = PasswordChangeForm(user=request.user, data=request.POST)
+        if password_form.is_valid():
+            user = password_form.save()
+            user.password_change_required = False
+            user.temp_password = None
+            user.save()
+            update_session_auth_hash(request, user)  
+            messages.success(request, "Password changed successfully! You can now access your account.")
+            return redirect('after_login')
+        else:
+            messages.error(request, 'Error changing password. Please try again.')
+    else:
+        password_form = PasswordChangeForm(user=request.user)
+        temp_pass_msg = f" Your temporary password was: {request.user.temp_password}" if request.user.temp_password else ""
+    
+    return render(request, 'after_login/force_password_change.html', {
+        'password_form': password_form,
+        'temp_password': request.user.temp_password
+    })
 
 
 
-#---------------------------------------------------------------------------------
-#------------------------ ADMIN RELATED VIEWS START ------------------------------
-#---------------------------------------------------------------------------------
+
+
+
+#-- ADMIN RELATED VIEWS START 
+
 @login_required()
 @user_passes_test(is_admin)
 def admin_dashboard_view(request):
-    #for both table in admin dashboard
     doctors=Doctor.objects.all().order_by('-id')
     departments=Department.objects.all().order_by('-id')
     medicines=Medicine.objects.all().order_by('-id')
     nurses=Nurse.objects.all().order_by('-id')
     patients=Patient.objects.all().order_by('-id')
-    #for three cards
     doctorcount=Doctor.objects.all().filter(user__is_active=True).count()
     pendingdoctorcount=Doctor.objects.all().filter(user__is_active=False).count()
     
@@ -333,7 +361,6 @@ def admin_delete_user_view(request, id):
     role = user.role
     
     try:
-        # If deleting a doctor, first unassign them from all patients
         if role == 'DOCTOR' and hasattr(user, 'doctor'):
             Patient.objects.filter(assigned_doctor=user.doctor).update(assigned_doctor=None)
         
@@ -362,6 +389,99 @@ def admin_delete_medicine_view(request, id):
     medicine.delete()
     messages.warning(request, f"The medication has been deleted from the hospital database.")
     return redirect('admin_manager', data='MEDICINE')
+
+
+
+@login_required
+@user_passes_test(is_admin)
+def admin_create_staff_view(request):
+    """Admin creates staff (doctors, nurses) with auto-generated passwords"""
+    import random
+    import string
+    
+    if request.method == 'POST':
+        role = request.POST.get('role')
+        username = request.POST.get('username')
+        first_name = request.POST.get('first_name')
+        last_name = request.POST.get('last_name')
+        email = request.POST.get('email')
+        initial_password = request.POST.get('initial_password', '').strip()
+        
+        if not all([role, username, first_name, last_name, email]):
+            messages.error(request, "All fields are required.")
+            return render(request, 'after_login/new_admin_create_staff.html', {'roles': User.Role.choices})
+        
+        # Check if username already exists
+        if User.objects.filter(username=username).exists():
+            messages.error(request, f"Username '{username}' already exists. Please choose another.")
+            return render(request, 'after_login/new_admin_create_staff.html', {'roles': User.Role.choices})
+        
+        # Use provided password or generate random one
+        if initial_password:
+            if len(initial_password) < 8:
+                messages.error(request, "Password must be at least 8 characters long.")
+                return render(request, 'after_login/new_admin_create_staff.html', {'roles': User.Role.choices})
+            temp_password = initial_password
+        else:
+            temp_password = ''.join(random.choices(string.ascii_letters + string.digits, k=10))
+        
+        # Create user
+        user = User.objects.create_user(
+            username=username,
+            password=temp_password,
+            first_name=first_name,
+            last_name=last_name,
+            email=email,
+            role=role
+        )
+        user.is_active = True
+        user.is_approved = True
+        user.approved_by = request.user
+        user.approved_at = timezone.now()
+        user.password_change_required = True
+        user.temp_password = temp_password
+        
+        if role == 'ADMIN':
+            user.is_staff = True
+        
+        user.save()
+        
+        # Send email with credentials
+        try:
+            send_mail(
+                subject='Your Account Has Been Created - MedCare Hospital',
+                message=f'''Dear {user.get_full_name()},
+
+Your account has been created successfully!
+
+Username: {username}
+Temporary Password: {temp_password}
+Role: {user.get_role_display()}
+
+Important: You MUST change your password on first login.
+
+Please login at: http://localhost:8000/{role.lower()}/login/
+
+Best regards,
+MedCare Hospital Administration''',
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[email],
+                fail_silently=True,
+            )
+        except:
+            pass
+        
+        messages.success(request, f'''
+            Account created successfully!<br>
+            <strong>Username:</strong> {username}<br>
+            <strong>Temporary Password:</strong> <code>{temp_password}</code><br>
+            <strong>Role:</strong> {user.get_role_display()}<br>
+            <em>User must change password on first login. Credentials sent to {email}.</em>
+        ''')
+        return redirect('admin_create_staff')
+    
+    roles = [(role[0], role[1]) for role in User.Role.choices if role[0] != 'PATIENT']
+    return render(request, 'after_login/new_admin_create_staff.html', {'roles': roles})
 
 
 
@@ -519,10 +639,31 @@ class AdminUpdateUserView(View):
         form = None
         if is_doctor(user):
             form = AdminDoctorForm(request.POST, instance=user.doctor)
+            if form.is_valid():
+                new_password = form.cleaned_data.get('new_password')
+                if new_password:
+                    user.set_password(new_password)
+                    user.save()
+                    messages.success(request, f"Password updated for {user.username}")
+                form.save()
         elif is_nurse(user):
             form = AdminNurseForm(request.POST, instance=user.nurse)
+            if form.is_valid():
+                new_password = form.cleaned_data.get('new_password')
+                if new_password:
+                    user.set_password(new_password)
+                    user.save()
+                    messages.success(request, f"Password updated for {user.username}")
+                form.save()
         elif is_patient(user):
             form = PatientForm(request.POST, request.FILES, instance=user.patient)
+            if form.is_valid():
+                new_password = form.cleaned_data.get('new_password')
+                if new_password:
+                    user.set_password(new_password)
+                    user.save()
+                    messages.success(request, f"Password updated for {user.username}")
+                form.save()
         
         if form and form.is_valid():
             form.save()
@@ -648,7 +789,6 @@ def admin_delete_appointment_view(request, id):
 @user_passes_test(is_admin)
 def admin_discharge_patient_view(request, id):
     appointment = Appointment.objects.get(id=id)
-    # Get or create discharge details for this appointment
     discharge_details, created = PatientDischargeDetails.objects.get_or_create(
         appointment=appointment,
         defaults={
@@ -703,7 +843,6 @@ def render_to_pdf(template_src, context_dict):
     template = get_template(template_src)
     html = template.render(context_dict)
     result = io.BytesIO()
-    # تحويل صفحة HTML إلى ملف PDF باستخدام pisa
     pdf = pisa.pisaDocument(io.BytesIO(html.encode("UTF-8")), result, encoding="UTF-8")
     if not pdf.err:
         return result.getvalue()
@@ -719,10 +858,8 @@ def download_permit_pdf(request, id):
     if pdf:
         response = HttpResponse(pdf, content_type='application/pdf')
         response['Content-Disposition'] = 'attachment; filename="permit.pdf"'
-        # response.write(pdf_content)
         return response
 
-    # If there is an error generating the PDF, you can handle it here
     return HttpResponse('Error generating PDF', status=500)
 
 
@@ -741,9 +878,9 @@ def department_view(request, id):
 
 
 
-#---------------------------------------------------------------------------------
-#------------------------ DOCTOR RELATED VIEWS START ------------------------------
-#---------------------------------------------------------------------------------
+
+#--DOCTOR RELATED VIEWS START 
+
 @login_required
 @user_passes_test(is_doctor)
 def doctor_dashboard_view(request):
@@ -800,9 +937,9 @@ def doctor_report_view(request, id):
 
 
 
-#---------------------------------------------------------------------------------
-#------------------------ NURSE RELATED VIEWS START ------------------------------
-#---------------------------------------------------------------------------------
+
+#--NURSE RELATED VIEWS START
+
 @login_required
 @user_passes_test(is_nurse)
 def nurse_dashboard_view(request):
@@ -840,9 +977,8 @@ def nurse_appointment_view(request):
 
 
 
-#---------------------------------------------------------------------------------
-#------------------------ PATIENT RELATED VIEWS START ------------------------------
-#---------------------------------------------------------------------------------
+#-- PATIENT RELATED VIEWS START 
+
 @login_required
 @user_passes_test(is_patient)
 def patient_dashboard_view(request):
@@ -1116,11 +1252,6 @@ def _process_ai_classification(request, classifier_type: ClassifierType, templat
                         'overall_quality': qa.overall_quality.value,
                         'quality_score': f"{avg_quality * 100:.0f}%",
                         'brightness_score': f"{qa.brightness_score * 100:.0f}%",
-                        'contrast_score': f"{qa.contrast_score * 100:.0f}%",
-                        'sharpness_score': f"{qa.sharpness_score * 100:.0f}%",
-                        'noise_score': f"{qa.noise_score * 100:.0f}%",
-                        'is_acceptable': qa.is_usable,
-                        'issues': qa.issues,
                     }
                 })
             

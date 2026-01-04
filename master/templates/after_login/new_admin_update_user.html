@@ -278,4 +278,73 @@
         </div>
     </div>
 </section>
+
+<script>
+    // Add password visibility toggle functionality
+    document.addEventListener('DOMContentLoaded', function() {
+        // Find password field - try multiple possible IDs
+        let passwordField = document.getElementById('id_new_password');
+        
+        if (!passwordField) {
+            // If not found, search for any password input in the form
+            const passwordInputs = document.querySelectorAll('input[type="password"]');
+            if (passwordInputs.length > 0) {
+                passwordField = passwordInputs[0];
+            }
+        }
+        
+        if (passwordField) {
+            // Get the parent div that crispy forms creates
+            const parentDiv = passwordField.closest('.form-group') || passwordField.parentElement;
+            
+            // Create a wrapper for positioning
+            const inputWrapper = document.createElement('div');
+            inputWrapper.style.position = 'relative';
+            inputWrapper.style.display = 'flex';
+            inputWrapper.style.alignItems = 'center';
+            
+            // Insert wrapper before password field
+            passwordField.parentNode.insertBefore(inputWrapper, passwordField);
+            inputWrapper.appendChild(passwordField);
+            
+            // Create eye button
+            const eyeButton = document.createElement('button');
+            eyeButton.type = 'button';
+            eyeButton.className = 'btn btn-sm btn-outline-secondary';
+            eyeButton.style.position = 'absolute';
+            eyeButton.style.right = '10px';
+            eyeButton.style.top = '50%';
+            eyeButton.style.transform = 'translateY(-50%)';
+            eyeButton.style.zIndex = '10';
+            eyeButton.style.border = 'none';
+            eyeButton.style.background = 'transparent';
+            eyeButton.style.padding = '5px 10px';
+            eyeButton.innerHTML = '<i class="fas fa-eye text-muted"></i>';
+            eyeButton.title = 'Show password';
+            
+            // Add button to wrapper
+            inputWrapper.appendChild(eyeButton);
+            
+            // Add padding to password field to make room for button
+            passwordField.style.paddingRight = '45px';
+            
+            // Toggle password visibility
+            eyeButton.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                if (passwordField.type === 'password') {
+                    passwordField.type = 'text';
+                    eyeButton.innerHTML = '<i class="fas fa-eye-slash text-primary"></i>';
+                    eyeButton.title = 'Hide password';
+                } else {
+                    passwordField.type = 'password';
+                    eyeButton.innerHTML = '<i class="fas fa-eye text-muted"></i>';
+                    eyeButton.title = 'Show password';
+                }
+            });
+        }
+    });
+</script>
+
 {% endblock %}
