@@ -9,8 +9,8 @@ A comprehensive hospital management system built with Django, featuring deep lea
 - **Department Management**: Organize hospital departments and staff
 - **Medicine Inventory**: Track and manage medicine stock
 - **Medical Diagnostics**: Image classification for:
-   - Brain tumor detection (MRI scans)
-   - Bone fracture detection (X-rays)
+  - 🧠 Brain tumor detection (MRI scans)
+  - 🦴 Bone fracture detection (X-rays)
 
 ## Quick Start
 
@@ -52,29 +52,22 @@ A comprehensive hospital management system built with Django, featuring deep lea
    # Edit .env with your settings (generate a new SECRET_KEY!)
    ```
 
-5. **Download AI Models**
-   
-   Download the model files from Google Drive (links in `AI Models drive links.txt`) and place them in the `models/` folder:
-   - `brain.h5` - Brain tumor classifier
-   - `skin.h5` - Skin condition classifier
-   - `xray.h5` - Bone fracture classifier
-
-6. **Run migrations**
+5. **Run migrations**
    ```bash
    python manage.py migrate
    ```
 
-7. **Create a superuser**
+6. **Create a superuser**
    ```bash
    python manage.py createsuperuser
    ```
 
-8. **Run the development server**
+7. **Run the development server**
    ```bash
    python manage.py runserver
    ```
 
-9. **Access the application**
+8. **Access the application"
    - Main site: http://127.0.0.1:8000
    - Admin panel: http://127.0.0.1:8000/admin
 
@@ -87,13 +80,13 @@ hospital_management/
 │   ├── urls.py
 │   └── wsgi.py
 ├── master/                 # Main application
-│   ├── ai_classifier.py    # Unified AI classification module
+│   ├── ai_classifier.py    # Unified medical classification module
 │   ├── models.py           # Database models
 │   ├── views.py            # View functions
 │   ├── forms.py            # Django forms
 │   ├── templates/          # HTML templates
 │   └── static/             # CSS, JS, images
-├── models/                 # AI model files (.h5)
+├── models/                 # Model files (.h5)
 ├── media/                  # User uploaded files
 ├── logs/                   # Application logs
 ├── requirements.txt
@@ -111,22 +104,19 @@ hospital_management/
 - Environment-based configuration
 
 ## AI Models
+## 🤖 Classification Models
+
 
 The system uses TensorFlow/Keras models for medical image classification:
 
 | Model | Purpose | Classes |
 |-------|---------|---------|
-| brain.h5 | Brain MRI analysis | No Tumor, Stable Tumor, Unstable Tumor |
-| skin.h5 | Skin condition detection | 9 skin conditions including melanoma |
+| brain.h5 | Brain MRI analysis | No Tumor, Tumor Detected |
 | xray.h5 | Bone X-ray analysis | No Fracture, Fractured |
 
-**Note**: AI models are loaded lazily to improve startup time.
-
-### Advanced AI Features
-
-- **Test-Time Augmentation (TTA)**: Multiple augmented predictions for more robust results
+**Note**: Models are loaded lazily to improve startup time.
 - **Image Quality Assessment**: Automatic evaluation of brightness, contrast, sharpness, and noise
-- **Grad-CAM Visualization**: Heatmaps showing which regions influenced the AI decision
+- **Grad-CAM Visualization**: Heatmaps showing which regions influenced the classification decision
 - **Severity Classification**: Automatic urgency and severity assessment
 - **Comprehensive Recommendations**: Medical guidance based on detected conditions
 
@@ -136,11 +126,11 @@ The system uses TensorFlow/Keras models for medical image classification:
 
 `POST /api/ai/classify/`
 
-Classify medical images using AI models.
+Classify medical images using deep learning models.
 
 **Parameters:**
 - `image` (file, required): The image file to classify
-- `classifier` (string, required): One of `skin`, `brain`, `bones`
+- `classifier` (string, required): One of `brain`, `bones`
 - `generate_heatmap` (string, optional): `true` to generate Grad-CAM heatmap
 - `use_tta` (string, optional): `true` to use test-time augmentation
 - `assess_quality` (string, optional): `true` to assess image quality (default: true)
@@ -149,14 +139,14 @@ Classify medical images using AI models.
 ```json
 {
   "success": true,
-  "classifier": "skin",
+  "classifier": "brain",
   "result": {
-    "class_name": "Melanoma",
+    "class_name": "Tumor Detected",
     "confidence": 0.92,
     "is_confident": true,
     "severity": "critical",
     "urgency": "Immediate attention required",
-    "description": "Malignant skin cancer..."
+    "description": "Brain tumor detected..."
   },
   "top_predictions": [...],
   "recommendations": [...],
@@ -167,16 +157,15 @@ Classify medical images using AI models.
 
 ### Models Status Endpoint
 
-`GET /api/ai/models/status/`
+`GET /api/models/status/`
 
-Check the status of all AI models.
+Check the status of all classification models.
 
 **Example Response:**
 ```json
 {
   "success": true,
   "models_status": {
-    "skin": {"available": true, "path": "..."},
     "brain": {"available": true, "path": "..."},
     "bones": {"available": true, "path": "..."}
   }
@@ -188,7 +177,7 @@ Check the status of all AI models.
 | Role | Capabilities |
 |------|-------------|
 | **Admin** | Full system access, user management, reports |
-| **Doctor** | Patient management, appointments, AI diagnostics |
+| **Doctor** | Patient management, appointments, medical diagnostics |
 | **Nurse** | Patient care, appointment scheduling |
 | **Patient** | View appointments, medical records |
 
@@ -226,4 +215,4 @@ This project is for educational purposes.
 
 ## Disclaimer
 
-The AI diagnostic tools are for educational/demonstration purposes only and should **NOT** be used for actual medical diagnosis. Always consult qualified healthcare professionals.
+The diagnostic tools are for educational/demonstration purposes only and should **NOT** be used for actual medical diagnosis. Always consult qualified healthcare professionals.
